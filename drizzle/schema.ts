@@ -1,17 +1,10 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, float, decimal } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
  */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -25,4 +18,65 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// ── Oracle Scan Sessions ──
+
+export const scanSessions = mysqlTable("scan_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  scanDate: varchar("scanDate", { length: 10 }).notNull(), // YYYY-MM-DD
+  status: mysqlEnum("status", ["running", "completed", "failed"]).default("running").notNull(),
+  totalStocksScanned: int("totalStocksScanned").default(0),
+  picksGenerated: int("picksGenerated").default(0),
+  notificationSent: int("notificationSent").default(0),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ScanSession = typeof scanSessions.$inferSelect;
+export type InsertScanSession = typeof scanSessions.$inferInsert;
+
+// ── Oracle Scan Picks ──
+
+export const scanPicks = mysqlTable("scan_picks", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: int("sessionId").notNull(),
+  ticker: varchar("ticker", { length: 10 }).notNull(),
+  companyName: varchar("companyName", { length: 255 }),
+  bias: mysqlEnum("bias", ["LONG", "SHORT"]).notNull(),
+  currentPrice: float("currentPrice"),
+  entryPrice: float("entryPrice"),
+  stopLoss: float("stopLoss"),
+  target1: float("target1"),
+  target2: float("target2"),
+  target3: float("target3"),
+  riskRewardRatio: float("riskRewardRatio"),
+  oracleScore: int("oracleScore").default(0),
+  marketCap: float("marketCap"),
+  floatShares: float("floatShares"),
+  volume: int("volume"),
+  avgVolume: int("avgVolume"),
+  gapPercent: float("gapPercent"),
+  dayChangePercent: float("dayChangePercent"),
+  support: float("support"),
+  resistance: float("resistance"),
+  reasoning: text("reasoning"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ScanPick = typeof scanPicks.$inferSelect;
+export type InsertScanPick = typeof scanPicks.$inferInsert;
+
+// ── Notification Preferences ──
+
+export const notificationPreferences = mysqlTable("notification_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  enabled: int("enabled").default(1),
+  minOracleScore: int("minOracleScore").default(60),
+  biasFilter: mysqlEnum("biasFilter", ["ALL", "LONG", "SHORT"]).default("ALL"),
+  maxPicks: int("maxPicks").default(10),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
