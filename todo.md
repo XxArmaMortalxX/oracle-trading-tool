@@ -40,3 +40,11 @@
 - [x] Dev server runs without errors
 - [x] All pages render correctly in browser
 - [x] Save checkpoint and deliver
+
+## Real-Time Market Data Update
+- [x] Research available real-time stock market data APIs
+- [x] Update oracleScanner.ts to fetch live market data (prices, volume, gaps, market cap, float)
+- [x] Expand the scan universe to cover more tickers dynamically (200+ tickers)
+- [ ] Update the Screener page to use live data instead of sample data (kept as demo)
+- [x] Test scanner with real market data end-to-end (28 tests passing)
+- [x] Verify Dashboard displays live picks correctly

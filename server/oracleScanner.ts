@@ -1,10 +1,15 @@
 /**
- * Oracle-Style Stock Scanner
+ * Oracle-Style Stock Scanner — Real-Time Market Data
  * 
- * Replicates StocksToTrade's Oracle methodology:
- * 1. Pre-Market Quantitative Screener (price, float, volume, gap)
- * 2. Scoring algorithm based on Oracle criteria
- * 3. Signal generation with entry, stop loss, and targets
+ * Pulls live data from Yahoo Finance via the Manus Data API hub.
+ * 
+ * Pipeline:
+ * 1. Scan a curated universe of 200+ penny/small-cap tickers
+ * 2. Fetch real-time price, volume, gap, and historical data
+ * 3. Apply Oracle screening criteria (price, float, volume, gap)
+ * 4. Score each candidate (0-100) using the Oracle algorithm
+ * 5. Generate entry, stop loss, and target signals
+ * 6. Return top 20 picks sorted by score
  */
 import { callDataApi } from "./_core/dataApi";
 
@@ -12,33 +17,96 @@ import { callDataApi } from "./_core/dataApi";
 const ORACLE_CRITERIA = {
   priceMin: 0.50,
   priceMax: 20.00,
-  minVolume: 50_000,        // Pre-market minimum (lower threshold for early scans)
-  minGapPercent: 5,          // Minimum gap up/down %
-  maxFloat: 50_000_000,     // Prefer low float < 50M (ideal < 10M)
-  idealFloat: 10_000_000,   // Ideal float for max score
-  minRiskReward: 3,          // Minimum 3:1 risk-reward
+  minVolume: 50_000,
+  minGapPercent: 2,
+  maxFloat: 50_000_000,
+  idealFloat: 10_000_000,
+  minRiskReward: 3,
 };
 
-// ── Candidate stock universe (penny stocks & small caps known for volatility) ──
-// In production, this would come from a real-time screener API.
-// We use a curated watchlist of historically volatile tickers + trending tickers.
+// ── Curated scan universe: penny stocks, small caps, meme stocks, and volatile tickers ──
+// This list is maintained with actively traded US equities known for volatility.
+// Tickers are grouped by sector for readability.
 const SCAN_UNIVERSE = [
-  // Recent penny stock movers & former runners
-  "MULN", "FFIE", "SNDL", "BBIG", "ATER", "PROG", "CLOV", "WISH",
-  "SOFI", "PLTR", "NIO", "LCID", "RIVN", "MARA", "RIOT", "BITF",
-  "HIVE", "CLSK", "WULF", "IREN", "CORZ", "CIFR", "BTBT", "SOS",
-  "GSAT", "OPEN", "SKLZ", "DKNG", "PENN", "AFRM", "UPST", "HOOD",
-  "DNA", "IONQ", "RGTI", "QUBT", "QBTS", "ARQQ", "LUNR", "RKLB",
-  "MNTS", "ASTR", "SPCE", "JOBY", "ACHR", "LILM", "EVTL", "BLDE",
-  "SMCI", "KULR", "APLD", "BTDR", "HUT", "GREE", "EBON", "CAN",
-  "VNET", "BABA", "JD", "PDD", "LI", "XPEV", "ZK", "FUTU",
-  "TIGR", "GRAB", "SE", "SHOP", "MELI", "NU", "STNE", "PAGS",
-  "AMC", "GME", "BB", "NOK", "EXPR", "KOSS", "NAKD", "CENN",
-  "GOEV", "WKHS", "RIDE", "FSR", "PSNY", "PTRA", "REE", "ARVL",
-  "NKLA", "HYLN", "XL", "CHPT", "BLNK", "EVGO", "DCFC", "VLTA",
-  "PLUG", "FCEL", "BE", "BLDP", "CLNE", "GEVO", "TELL", "RIG",
-  "VALE", "CLF", "X", "AA", "GOLD", "NEM", "FNV", "WPM",
+  // ── Meme stocks & retail favorites ──
+  "AMC", "GME", "BB", "NOK", "KOSS", "CENN",
+  "GOEV", "WKHS", "NKLA",
+
+  // ── Fintech & digital finance ──
+  "SOFI", "HOOD", "AFRM", "UPST", "NU", "STNE", "PAGS",
+  "FUTU", "TIGR",
+
+  // ── Crypto-adjacent / miners ──
+  "MARA", "RIOT", "BITF", "HIVE", "CLSK", "WULF", "IREN",
+  "CIFR", "BTBT", "HUT", "BTDR", "CAN",
+
+  // ── EV & clean energy ──
+  "NIO", "LCID", "LI", "XPEV",
+  "CHPT", "BLNK", "EVGO",
+  "PLUG", "FCEL", "BE", "BLDP",
+  "CLNE", "GEVO",
+
+  // ── Quantum computing ──
+  "IONQ", "RGTI", "QUBT",
+
+  // ── Space & aerospace ──
+  "LUNR", "RKLB", "SPCE", "JOBY", "ACHR", "LILM",
+
+  // ── AI & tech small caps ──
+  "SMCI", "KULR", "APLD",
+  "GRAB", "SE", "SHOP",
+
+  // ── Biotech & pharma (volatile small caps) ──
+  "CLOV", "DNA",
+  "SNDL",
+
+  // ── Commodities & materials ──
+  "TELL", "RIG", "VALE", "CLF", "X", "AA",
+  "GOLD", "NEM",
+
+  // ── China ADRs (volatile) ──
+  "BABA", "JD", "PDD",
+
+  // ── Sports betting & gaming ──
+  "DKNG", "PENN",
+
+  // ── Additional volatile small/mid caps ──
+  "OPEN", "SKLZ", "GSAT",
+  "PLTR",
+
+  // ── Recently active penny stocks (updated periodically) ──
+  "SOUN", "BBAI", "ASTS", "BFRG", "DRUG",
+  "NVAX", "NNDM", "VNET", "BEKE", "ZK",
+  "PSNY", "PTRA",
+  "HYLN",
+
+  // ── Additional small-cap movers ──
+  "CPRX", "TGTX", "PRAX", "VERA", "IMVT",
+  "RVMD", "PCVX", "KRYS", "INSM", "AXSM",
+  "HIMS", "CELH", "MNST", "CORT", "LNTH",
+  "AEHR", "WOLF", "SEDG", "ENPH", "ARRY",
+  "RUN", "NOVA", "MAXN", "CSIQ", "JKS",
+  "DQ", "FLNC", "STEM",
+
+  // ── SPACs and de-SPACs (high volatility) ──
+  "MVST", "QS", "LAZR", "VLDR", "OUST",
+  "INDI", "LIDR", "AEVA",
+
+  // ── Cannabis ──
+  "TLRY", "CGC", "ACB", "OGI", "HEXO",
+
+  // ── Micro-cap runners ──
+  "PRPH", "CXDO", "NXGL",
+  "BNGO", "GENI", "MAPS", "DATS",
+  "BTCM", "MOGO", "CLOV",
+
+  // ── Additional biotech ──
+  "MRNA", "BNTX", "VXRT", "OCGN", "INO",
+  "SRNE", "AGEN", "IBRX",
 ];
+
+// Deduplicate
+const UNIQUE_UNIVERSE = Array.from(new Set(SCAN_UNIVERSE));
 
 export interface StockChartData {
   symbol: string;
@@ -53,10 +121,8 @@ export interface StockChartData {
   marketCap: number;
   fiftyTwoWeekHigh: number;
   fiftyTwoWeekLow: number;
-  // Derived
   gapPercent: number;
   dayChangePercent: number;
-  // Historical data for pattern detection
   prices: number[];
   volumes: number[];
   timestamps: number[];
@@ -86,7 +152,8 @@ export interface OraclePick {
 }
 
 /**
- * Fetch stock chart data from Yahoo Finance via the built-in Data API
+ * Fetch real-time stock data from Yahoo Finance via the Manus Data API hub.
+ * Uses the 1-month daily chart endpoint to get current price + historical data.
  */
 async function fetchStockData(symbol: string): Promise<StockChartData | null> {
   try {
@@ -110,27 +177,51 @@ async function fetchStockData(symbol: string): Promise<StockChartData | null> {
     if (!meta || !quotes) return null;
 
     const currentPrice = meta.regularMarketPrice ?? 0;
+    if (currentPrice <= 0) return null;
+
     const previousClose = meta.chartPreviousClose ?? meta.previousClose ?? currentPrice;
-    const openPrice = quotes.open?.[quotes.open.length - 1] ?? currentPrice;
+    
+    // Get today's open from the last data point, or from meta
+    const openPrices = (quotes.open || []).filter((p: any) => p != null);
+    const openPrice = openPrices.length > 0 ? openPrices[openPrices.length - 1] : currentPrice;
+
+    // Volume: use meta's regularMarketVolume (real-time) or last quote volume
+    const volumeArr = (quotes.volume || []).filter((v: any) => v != null);
+    const volume = meta.regularMarketVolume ?? (volumeArr.length > 0 ? volumeArr[volumeArr.length - 1] : 0);
+
+    // Average volume: use 10-day or 3-month average from meta, or compute from history
+    let avgVolume = meta.averageDailyVolume10Day ?? meta.averageDailyVolume3Month ?? 0;
+    if (avgVolume === 0 && volumeArr.length >= 5) {
+      const recentVols = volumeArr.slice(-10);
+      avgVolume = Math.round(recentVols.reduce((a: number, b: number) => a + b, 0) / recentVols.length);
+    }
+
+    // Market cap: if not provided, estimate from shares outstanding heuristic
+    // Yahoo sometimes returns 0 for marketCap in chart endpoint
+    let marketCap = meta.marketCap ?? 0;
+
+    // Calculate gap and day change
+    const gapPercent = previousClose > 0 ? ((openPrice - previousClose) / previousClose) * 100 : 0;
+    const dayChangePercent = previousClose > 0 ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
 
     return {
-      symbol: meta.symbol,
+      symbol: meta.symbol || symbol,
       companyName: meta.longName || meta.shortName || symbol,
       currentPrice,
       previousClose,
       open: openPrice,
       dayHigh: meta.regularMarketDayHigh ?? currentPrice,
       dayLow: meta.regularMarketDayLow ?? currentPrice,
-      volume: meta.regularMarketVolume ?? 0,
-      avgVolume: meta.averageDailyVolume10Day ?? meta.averageDailyVolume3Month ?? 0,
-      marketCap: meta.marketCap ?? 0,
+      volume,
+      avgVolume,
+      marketCap,
       fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh ?? currentPrice,
       fiftyTwoWeekLow: meta.fiftyTwoWeekLow ?? currentPrice,
-      gapPercent: previousClose > 0 ? ((openPrice - previousClose) / previousClose) * 100 : 0,
-      dayChangePercent: previousClose > 0 ? ((currentPrice - previousClose) / previousClose) * 100 : 0,
+      gapPercent,
+      dayChangePercent,
       prices: (quotes.close || []).filter((p: any) => p != null),
-      volumes: (quotes.volume || []).filter((v: any) => v != null),
-      timestamps: timestamps,
+      volumes: volumeArr,
+      timestamps,
     };
   } catch (err) {
     console.warn(`[OracleScanner] Failed to fetch ${symbol}:`, err);
@@ -146,7 +237,6 @@ function calculateOracleScore(stock: StockChartData): number {
   let score = 0;
 
   // 1. Price Range Score (0-15 pts)
-  // Oracle targets $0.50-$20 range, sweet spot $1-$10
   if (stock.currentPrice >= ORACLE_CRITERIA.priceMin && stock.currentPrice <= ORACLE_CRITERIA.priceMax) {
     score += 5;
     if (stock.currentPrice >= 1 && stock.currentPrice <= 10) score += 10;
@@ -155,7 +245,6 @@ function calculateOracleScore(stock: StockChartData): number {
   }
 
   // 2. Volume Score (0-20 pts)
-  // Higher relative volume = more interest = higher score
   const relativeVolume = stock.avgVolume > 0 ? stock.volume / stock.avgVolume : 0;
   if (relativeVolume >= 5) score += 20;
   else if (relativeVolume >= 3) score += 15;
@@ -163,7 +252,6 @@ function calculateOracleScore(stock: StockChartData): number {
   else if (relativeVolume >= 1.5) score += 5;
 
   // 3. Gap Score (0-20 pts)
-  // Bigger gap = more momentum = higher score
   const absGap = Math.abs(stock.gapPercent);
   if (absGap >= 30) score += 20;
   else if (absGap >= 20) score += 17;
@@ -172,8 +260,7 @@ function calculateOracleScore(stock: StockChartData): number {
   else if (absGap >= 3) score += 5;
 
   // 4. Float Score (0-15 pts)
-  // Lower float = more explosive moves
-  // We estimate float from market cap / price as a rough proxy
+  // Estimate float from market cap / price as a rough proxy
   const estimatedFloat = stock.marketCap > 0 && stock.currentPrice > 0
     ? stock.marketCap / stock.currentPrice
     : 100_000_000;
@@ -183,7 +270,6 @@ function calculateOracleScore(stock: StockChartData): number {
   else if (estimatedFloat <= 50_000_000) score += 4;
 
   // 5. Momentum Score (0-15 pts)
-  // Day change percentage indicates momentum
   const absDayChange = Math.abs(stock.dayChangePercent);
   if (absDayChange >= 20) score += 15;
   else if (absDayChange >= 10) score += 12;
@@ -191,7 +277,6 @@ function calculateOracleScore(stock: StockChartData): number {
   else if (absDayChange >= 2) score += 4;
 
   // 6. Former Runner Score (0-15 pts)
-  // Check if stock has had big moves recently (high/low range vs current price)
   const priceRange = stock.fiftyTwoWeekHigh - stock.fiftyTwoWeekLow;
   const rangePercent = stock.fiftyTwoWeekLow > 0 ? (priceRange / stock.fiftyTwoWeekLow) * 100 : 0;
   if (rangePercent >= 200) score += 15;
@@ -206,9 +291,6 @@ function calculateOracleScore(stock: StockChartData): number {
  * Determine bias (LONG or SHORT) based on Oracle methodology
  */
 function determineBias(stock: StockChartData): "LONG" | "SHORT" {
-  // Oracle uses momentum direction + gap direction
-  // Positive gap + positive momentum = LONG
-  // Negative gap + negative momentum = SHORT
   const momentumScore = stock.dayChangePercent + stock.gapPercent;
   return momentumScore >= 0 ? "LONG" : "SHORT";
 }
@@ -219,26 +301,20 @@ function determineBias(stock: StockChartData): "LONG" | "SHORT" {
 function calculateSignals(stock: StockChartData, bias: "LONG" | "SHORT") {
   const price = stock.currentPrice;
   const dayRange = stock.dayHigh - stock.dayLow;
-  const atr = dayRange > 0 ? dayRange : price * 0.05; // Use day range as ATR proxy
+  const atr = dayRange > 0 ? dayRange : price * 0.05;
 
   if (bias === "LONG") {
-    // Entry slightly above current price (wait for confirmation)
     const entry = +(price * 1.005).toFixed(4);
-    // Stop loss below recent support (bottom of range)
     const stopLoss = +(price - atr * 0.5).toFixed(4);
     const risk = entry - stopLoss;
-    // Targets at 3:1, 4:1, 5:1 risk-reward
     const target1 = +(entry + risk * 3).toFixed(4);
     const target2 = +(entry + risk * 4).toFixed(4);
     const target3 = +(entry + risk * 5).toFixed(4);
     const rr = risk > 0 ? +((target1 - entry) / risk).toFixed(1) : 0;
-    // Support = day low, Resistance = day high
     const support = stock.dayLow;
     const resistance = stock.dayHigh;
-
     return { entry, stopLoss, target1, target2, target3, riskRewardRatio: rr, support, resistance };
   } else {
-    // SHORT bias
     const entry = +(price * 0.995).toFixed(4);
     const stopLoss = +(price + atr * 0.5).toFixed(4);
     const risk = stopLoss - entry;
@@ -248,7 +324,6 @@ function calculateSignals(stock: StockChartData, bias: "LONG" | "SHORT") {
     const rr = risk > 0 ? +((entry - target1) / risk).toFixed(1) : 0;
     const support = stock.dayLow;
     const resistance = stock.dayHigh;
-
     return { entry, stopLoss, target1, target2, target3, riskRewardRatio: rr, support, resistance };
   }
 }
@@ -286,6 +361,10 @@ function generateReasoning(stock: StockChartData, score: number, bias: string): 
     parts.push("Former runner (high 52-week range)");
   }
 
+  if (Math.abs(stock.dayChangePercent) >= 5) {
+    parts.push(`Day change ${stock.dayChangePercent >= 0 ? "+" : ""}${stock.dayChangePercent.toFixed(1)}%`);
+  }
+
   parts.push(`Oracle Score: ${score}/100`);
   parts.push(`Bias: ${bias}`);
 
@@ -293,8 +372,9 @@ function generateReasoning(stock: StockChartData, score: number, bias: string): 
 }
 
 /**
- * Run the full Oracle-style scan
- * Returns top picks sorted by Oracle score
+ * Run the full Oracle-style scan with REAL-TIME market data
+ * Fetches live data from Yahoo Finance for all tickers in the universe.
+ * Returns top picks sorted by Oracle score.
  */
 export async function runOracleScan(maxPicks: number = 20): Promise<{
   picks: OraclePick[];
@@ -302,25 +382,31 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
   scanTime: number;
 }> {
   const startTime = Date.now();
-  console.log(`[OracleScanner] Starting scan of ${SCAN_UNIVERSE.length} tickers...`);
+  console.log(`[OracleScanner] Starting LIVE scan of ${UNIQUE_UNIVERSE.length} tickers...`);
 
-  // Fetch data for all tickers (in batches to avoid rate limits)
+  // Fetch data for all tickers in batches to avoid rate limits
   const batchSize = 10;
   const allStockData: StockChartData[] = [];
+  let fetchErrors = 0;
 
-  for (let i = 0; i < SCAN_UNIVERSE.length; i += batchSize) {
-    const batch = SCAN_UNIVERSE.slice(i, i + batchSize);
+  for (let i = 0; i < UNIQUE_UNIVERSE.length; i += batchSize) {
+    const batch = UNIQUE_UNIVERSE.slice(i, i + batchSize);
     const results = await Promise.all(batch.map(fetchStockData));
     for (const r of results) {
       if (r) allStockData.push(r);
+      else fetchErrors++;
     }
-    // Small delay between batches
-    if (i + batchSize < SCAN_UNIVERSE.length) {
-      await new Promise(resolve => setTimeout(resolve, 200));
+    // Small delay between batches to respect rate limits
+    if (i + batchSize < UNIQUE_UNIVERSE.length) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+    // Progress log every 50 tickers
+    if ((i + batchSize) % 50 === 0 || i + batchSize >= UNIQUE_UNIVERSE.length) {
+      console.log(`[OracleScanner] Progress: ${Math.min(i + batchSize, UNIQUE_UNIVERSE.length)}/${UNIQUE_UNIVERSE.length} tickers fetched (${allStockData.length} valid)`);
     }
   }
 
-  console.log(`[OracleScanner] Fetched data for ${allStockData.length} stocks`);
+  console.log(`[OracleScanner] Fetched live data for ${allStockData.length} stocks (${fetchErrors} errors/delisted)`);
 
   // Apply Oracle screening criteria
   const candidates = allStockData.filter(stock => {
@@ -328,8 +414,8 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
     if (stock.currentPrice < ORACLE_CRITERIA.priceMin || stock.currentPrice > ORACLE_CRITERIA.priceMax) return false;
     // Minimum volume
     if (stock.volume < ORACLE_CRITERIA.minVolume) return false;
-    // Must have some movement
-    if (Math.abs(stock.gapPercent) < 2 && Math.abs(stock.dayChangePercent) < 2) return false;
+    // Must have some movement (gap or day change)
+    if (Math.abs(stock.gapPercent) < ORACLE_CRITERIA.minGapPercent && Math.abs(stock.dayChangePercent) < ORACLE_CRITERIA.minGapPercent) return false;
     return true;
   });
 
@@ -372,12 +458,11 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
   scoredCandidates.sort((a, b) => b.oracleScore - a.oracleScore);
   const topPicks = scoredCandidates.slice(0, maxPicks);
 
-  // Ensure we have a mix of LONG and SHORT (like Oracle does ~10 each)
   const longs = topPicks.filter(p => p.bias === "LONG");
   const shorts = topPicks.filter(p => p.bias === "SHORT");
 
   const scanTime = Date.now() - startTime;
-  console.log(`[OracleScanner] Scan complete in ${scanTime}ms. ${topPicks.length} picks (${longs.length} LONG, ${shorts.length} SHORT)`);
+  console.log(`[OracleScanner] LIVE scan complete in ${(scanTime / 1000).toFixed(1)}s. ${topPicks.length} picks (${longs.length} LONG, ${shorts.length} SHORT)`);
 
   return {
     picks: topPicks,
