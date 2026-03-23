@@ -119,13 +119,25 @@ export const appRouter = router({
       return getLatestPicks();
     }),
 
-    /** Manually trigger a scan (admin only) */
+    /** Manually trigger a scan (admin only) — always forces a fresh scan */
     triggerScan: adminProcedure.mutation(async () => {
-      const result = await executeScanRun();
+      const result = await executeScanRun({ force: true });
       return {
         sessionId: result.sessionId,
         picksCount: result.picks.length,
         notified: result.notified,
+      };
+    }),
+
+    /** Refresh live picks — fetches fresh real-time data from Yahoo Finance.
+     *  Forces a new scan even if one already ran today. */
+    refreshPicks: publicProcedure.mutation(async () => {
+      console.log(`[Dashboard] Refresh picks requested — forcing live scan...`);
+      const result = await executeScanRun({ force: true });
+      return {
+        sessionId: result.sessionId,
+        picksCount: result.picks.length,
+        success: true,
       };
     }),
   }),

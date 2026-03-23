@@ -82,6 +82,36 @@ describe("scan routes", () => {
     const caller = appRouter.createCaller(ctx);
     await expect(caller.scan.triggerScan()).rejects.toThrow();
   });
+
+  it("refreshPicks route exists and is a public mutation", async () => {
+    // Verify the route is defined on the router (doesn't require calling the live API)
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+    // The route should exist — calling it will attempt a live scan which may fail
+    // due to DB/API, but it should NOT throw UNAUTHORIZED
+    const promise = caller.scan.refreshPicks();
+    try {
+      await promise;
+    } catch (err: any) {
+      // Accept DB errors or API errors, but NOT auth errors
+      expect(err.code).not.toBe("UNAUTHORIZED");
+      expect(err.code).not.toBe("FORBIDDEN");
+    }
+  }, 120_000);
+
+  it("refreshPicks does not require admin role", async () => {
+    // Verify a regular user can call refreshPicks (unlike triggerScan)
+    const ctx = createAuthContext("user");
+    const caller = appRouter.createCaller(ctx);
+    const promise = caller.scan.refreshPicks();
+    try {
+      await promise;
+    } catch (err: any) {
+      // Should NOT be an auth/role error
+      expect(err.code).not.toBe("UNAUTHORIZED");
+      expect(err.code).not.toBe("FORBIDDEN");
+    }
+  }, 120_000);
 });
 
 describe("notification routes", () => {

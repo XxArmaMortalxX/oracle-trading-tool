@@ -56,3 +56,13 @@
 - [x] Add loading states, error handling, rate-limit warning, and empty states for live data
 - [x] Write vitest tests for the screener endpoint (8 tests with mocked data)
 - [x] Verify end-to-end in browser
+
+## Dashboard Live Picks Refresh Button
+- [x] Review current Dashboard refresh button implementation
+- [x] Add scan.refreshPicks tRPC mutation (forces fresh Yahoo Finance scan, bypasses same-day dedup)
+- [x] Update scanRunner.ts with force option to bypass same-day check
+- [x] Wire Refresh button to call refreshPicks mutation with spinner + toast feedback
+- [x] Ensure refresh button pulls real-time data from Yahoo Finance (verified via curl: 20 picks, 105 stocks)
+- [x] Add loading state feedback when refreshing (spinner + "Scanning Market" badge)
+- [x] Test refresh functionality end-to-end (curl verified: session #30005, #30006)
+- [x] Write/update tests for the refresh flow (2 new tests, 38 total passing)

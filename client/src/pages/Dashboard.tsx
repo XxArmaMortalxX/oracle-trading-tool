@@ -63,7 +63,25 @@ export default function Dashboard() {
     retry: false,
   });
 
-  // Mutations
+  // ── Refresh Picks mutation — fetches fresh real-time data from Yahoo Finance ──
+  const refreshPicks = trpc.scan.refreshPicks.useMutation({
+    onSuccess: (data) => {
+      toast.success(
+        data.picksCount > 0
+          ? `Refreshed! ${data.picksCount} live picks from Yahoo Finance.`
+          : "Scan complete — no stocks matched Oracle criteria right now."
+      );
+      // Invalidate all scan queries to show fresh data
+      utils.scan.latestSession.invalidate();
+      utils.scan.latestPicks.invalidate();
+      utils.scan.recentSessions.invalidate();
+    },
+    onError: (err) => {
+      toast.error(`Refresh failed: ${err.message}`);
+    },
+  });
+
+  // ── Trigger Scan mutation (admin only) ──
   const triggerScan = trpc.scan.triggerScan.useMutation({
     onSuccess: (data) => {
       toast.success(`Scan complete! ${data.picksCount} picks generated.${data.notified ? " Notification sent!" : ""}`);
@@ -95,6 +113,9 @@ export default function Dashboard() {
   const longs = picks.filter((p) => p.bias === "LONG");
   const shorts = picks.filter((p) => p.bias === "SHORT");
 
+  const isRefreshing = refreshPicks.isPending;
+  const isScanning = triggerScan.isPending;
+
   return (
     <div className="container py-12">
       <motion.div variants={fadeUp} initial="hidden" animate="show">
@@ -106,6 +127,12 @@ export default function Dashboard() {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
                 LIVE DATA
               </span>
+              {isRefreshing && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo/10 border border-indigo/20 text-indigo text-xs font-mono font-medium tracking-wide">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  SCANNING MARKET
+                </span>
+              )}
             </div>
             <h1 className="font-heading text-3xl font-bold tracking-tight">
               Oracle <span className="text-gradient">Live Picks</span>
@@ -120,22 +147,24 @@ export default function Dashboard() {
               variant="outline"
               size="sm"
               className="gap-2 border-border/60"
-              onClick={() => {
-                utils.scan.latestPicks.invalidate();
-                utils.scan.latestSession.invalidate();
-              }}
+              onClick={() => refreshPicks.mutate()}
+              disabled={isRefreshing || isScanning}
             >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
+              {isRefreshing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              {isRefreshing ? "Scanning..." : "Refresh"}
             </Button>
             {user?.role === "admin" && (
               <Button
                 size="sm"
                 className="gap-2 bg-indigo hover:bg-indigo/90 text-white"
                 onClick={() => triggerScan.mutate()}
-                disabled={triggerScan.isPending}
+                disabled={isScanning || isRefreshing}
               >
-                {triggerScan.isPending ? (
+                {isScanning ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Play className="w-4 h-4" />
@@ -199,44 +228,52 @@ export default function Dashboard() {
         </div>
 
         {/* Loading state */}
-        {latestPicks.isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-indigo" />
-            <span className="ml-3 text-muted-foreground">Loading latest picks...</span>
+        {(latestPicks.isLoading || isRefreshing) && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-indigo mb-4" />
+            <span className="text-muted-foreground font-medium">
+              {isRefreshing
+                ? "Fetching real-time data from Yahoo Finance..."
+                : "Loading latest picks..."}
+            </span>
+            {isRefreshing && (
+              <span className="text-xs text-muted-foreground/60 mt-2">
+                Scanning 200+ tickers. This may take 30-60 seconds.
+              </span>
+            )}
           </div>
         )}
 
         {/* No data state */}
-        {!latestPicks.isLoading && picks.length === 0 && (
+        {!latestPicks.isLoading && !isRefreshing && picks.length === 0 && (
           <Card className="bg-card border-border/50 mb-8">
             <CardContent className="p-12 text-center">
               <Activity className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
               <h3 className="font-heading text-lg font-semibold mb-2">No Scan Data Yet</h3>
               <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
-                The Oracle scanner hasn't run yet. {user?.role === "admin"
-                  ? "Click 'Run Scan' above to trigger the first scan manually."
-                  : "Scans run automatically at 8:00 AM ET on trading days."}
+                The Oracle scanner hasn't run yet. Click "Refresh" to fetch real-time market data
+                from Yahoo Finance, or {user?.role === "admin"
+                  ? "click 'Run Scan' to trigger a full scan with notifications."
+                  : "wait for the daily 8:00 AM ET pre-market scan."}
               </p>
-              {user?.role === "admin" && (
-                <Button
-                  className="gap-2 bg-indigo hover:bg-indigo/90 text-white"
-                  onClick={() => triggerScan.mutate()}
-                  disabled={triggerScan.isPending}
-                >
-                  {triggerScan.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Play className="w-4 h-4" />
-                  )}
-                  Run First Scan
-                </Button>
-              )}
+              <Button
+                className="gap-2 bg-indigo hover:bg-indigo/90 text-white"
+                onClick={() => refreshPicks.mutate()}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                {isRefreshing ? "Scanning Market..." : "Fetch Live Data"}
+              </Button>
             </CardContent>
           </Card>
         )}
 
         {/* Picks Table */}
-        {picks.length > 0 && (
+        {!isRefreshing && picks.length > 0 && (
           <div className="mb-8">
             <h2 className="font-heading text-xl font-bold mb-4">Today's Oracle Picks</h2>
             <div className="overflow-x-auto">
@@ -251,7 +288,7 @@ export default function Dashboard() {
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">STOP</th>
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">TARGET</th>
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">R/R</th>
-                    <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">GAP%</th>
+                    <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">GAP %</th>
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">VOLUME</th>
                   </tr>
                 </thead>

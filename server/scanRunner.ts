@@ -18,19 +18,24 @@ import { notifyOwner } from "./_core/notification";
  * Execute a full scan run: fetch data, score, store, notify.
  * Returns the session ID and picks.
  */
-export async function executeScanRun(): Promise<{
+export async function executeScanRun(options?: { force?: boolean }): Promise<{
   sessionId: number;
   picks: OraclePick[];
   notified: boolean;
 }> {
+  const force = options?.force ?? false;
   const now = new Date();
   const scanDate = now.toISOString().slice(0, 10); // YYYY-MM-DD
 
-  // Check if we already ran today
-  const existing = await getScanSessionByDate(scanDate);
-  if (existing && existing.status === "completed") {
-    console.log(`[ScanRunner] Scan already completed for ${scanDate}, skipping.`);
-    return { sessionId: existing.id, picks: [], notified: false };
+  // Check if we already ran today (skip if force=true)
+  if (!force) {
+    const existing = await getScanSessionByDate(scanDate);
+    if (existing && existing.status === "completed") {
+      console.log(`[ScanRunner] Scan already completed for ${scanDate}, skipping.`);
+      return { sessionId: existing.id, picks: [], notified: false };
+    }
+  } else {
+    console.log(`[ScanRunner] Force refresh requested for ${scanDate}`);
   }
 
   // Create session
