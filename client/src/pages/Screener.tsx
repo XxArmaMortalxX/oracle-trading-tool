@@ -1,71 +1,107 @@
 /*
- * DESIGN: Signal Deck — Stock Screener Simulator
- * Interactive Oracle-style pre-market screener with filters
+ * DESIGN: Signal Deck — Live Stock Screener
+ * Real-time Oracle-style pre-market screener powered by Yahoo Finance
  */
-import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { trpc } from "@/lib/trpc";
 import {
   Search,
   Filter,
   TrendingUp,
   TrendingDown,
   ArrowUpRight,
+  ArrowDownRight,
   RotateCcw,
   Zap,
-  Info,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Activity,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 
-// Simulated stock data for demonstration
-const mockStocks = [
-  { ticker: "MVTX", price: 2.45, float: 3.2, volume: 1850000, gap: 47.3, catalyst: "FDA Approval", sector: "Biotech", formerRunner: true },
-  { ticker: "RSLS", price: 1.12, float: 5.1, volume: 2300000, gap: 127.0, catalyst: "Patent Grant", sector: "Tech", formerRunner: true },
-  { ticker: "GXAI", price: 3.20, float: 2.8, volume: 4500000, gap: 85.2, catalyst: "AI Partnership", sector: "Tech", formerRunner: true },
-  { ticker: "NXGL", price: 0.85, float: 8.5, volume: 890000, gap: 23.5, catalyst: "Earnings Beat", sector: "Consumer", formerRunner: false },
-  { ticker: "BFRG", price: 4.10, float: 1.9, volume: 3200000, gap: 62.8, catalyst: "Contract Win", sector: "Defense", formerRunner: true },
-  { ticker: "PRPH", price: 7.50, float: 6.3, volume: 1200000, gap: 18.4, catalyst: "Analyst Upgrade", sector: "Pharma", formerRunner: false },
-  { ticker: "XTIA", price: 1.65, float: 4.7, volume: 5600000, gap: 95.1, catalyst: "Merger News", sector: "Finance", formerRunner: true },
-  { ticker: "CXDO", price: 12.30, float: 9.8, volume: 780000, gap: 12.7, catalyst: "Revenue Growth", sector: "SaaS", formerRunner: false },
-  { ticker: "WBUY", price: 0.55, float: 7.2, volume: 3400000, gap: 210.5, catalyst: "Reddit Hype", sector: "Retail", formerRunner: false },
-  { ticker: "HPNN", price: 2.90, float: 2.1, volume: 6700000, gap: 73.6, catalyst: "FDA Phase 3", sector: "Biotech", formerRunner: true },
-  { ticker: "SNTI", price: 5.80, float: 3.5, volume: 1900000, gap: 34.2, catalyst: "New Product", sector: "Tech", formerRunner: true },
-  { ticker: "LMFA", price: 1.35, float: 11.2, volume: 450000, gap: 8.3, catalyst: "None", sector: "Finance", formerRunner: false },
-  { ticker: "DRUG", price: 8.90, float: 4.1, volume: 2800000, gap: 41.7, catalyst: "Clinical Trial", sector: "Pharma", formerRunner: true },
-  { ticker: "BNGO", price: 0.72, float: 15.3, volume: 12000000, gap: 5.2, catalyst: "Social Media", sector: "Biotech", formerRunner: false },
-  { ticker: "MVIS", price: 3.45, float: 8.9, volume: 980000, gap: 15.8, catalyst: "Partnership", sector: "Tech", formerRunner: true },
-];
+function formatVolume(n: number): string {
+  if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + "B";
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(0) + "K";
+  return n.toString();
+}
 
 export default function Screener() {
+  // ── Filter state ──
   const [priceMin, setPriceMin] = useState(0.5);
   const [priceMax, setPriceMax] = useState(20);
-  const [maxFloat, setMaxFloat] = useState(10);
-  const [minVolume, setMinVolume] = useState(500000);
-  const [minGap, setMinGap] = useState(5);
+  const [maxFloat, setMaxFloat] = useState(50);
+  const [minVolume, setMinVolume] = useState(50000);
+  const [minGap, setMinGap] = useState(2);
   const [formerRunnersOnly, setFormerRunnersOnly] = useState(false);
 
-  const filtered = useMemo(() => {
-    return mockStocks
-      .filter((s) => {
-        if (s.price < priceMin || s.price > priceMax) return false;
-        if (s.float > maxFloat) return false;
-        if (s.volume < minVolume) return false;
-        if (s.gap < minGap) return false;
-        if (formerRunnersOnly && !s.formerRunner) return false;
-        return true;
-      })
-      .sort((a, b) => b.gap - a.gap);
-  }, [priceMin, priceMax, maxFloat, minVolume, minGap, formerRunnersOnly]);
+  // ── Debounced query params ──
+  const [debouncedParams, setDebouncedParams] = useState({
+    priceMin, priceMax, minVolume, minGap, maxFloat, formerRunnersOnly,
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedParams({ priceMin, priceMax, minVolume, minGap, maxFloat, formerRunnersOnly });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [priceMin, priceMax, minVolume, minGap, maxFloat, formerRunnersOnly]);
+
+  // ── tRPC query ──
+  const { data, isLoading, isRefetching, error, refetch } = trpc.screener.scan.useQuery(
+    debouncedParams,
+    {
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    }
+  );
+
+  const results = data?.results ?? [];
+  const totalFetched = data?.totalFetched ?? 0;
+  const scanTimeMs = data?.scanTimeMs ?? 0;
+  const isCached = data?.cached ?? false;
+  const cacheAge = data?.cacheAgeSeconds ?? 0;
+  const apiErrors = data?.apiErrors ?? 0;
+  const isRateLimited = totalFetched === 0 && apiErrors > 0 && !isLoading;
+
+  // ── Sort state ──
+  const [sortBy, setSortBy] = useState<"oracleScore" | "gapPercent" | "volume" | "price">("oracleScore");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const sorted = useMemo(() => {
+    const arr = [...results];
+    arr.sort((a, b) => {
+      const va = a[sortBy] ?? 0;
+      const vb = b[sortBy] ?? 0;
+      return sortDir === "desc" ? vb - va : va - vb;
+    });
+    return arr;
+  }, [results, sortBy, sortDir]);
+
+  const toggleSort = useCallback((col: typeof sortBy) => {
+    if (sortBy === col) {
+      setSortDir(d => d === "desc" ? "asc" : "desc");
+    } else {
+      setSortBy(col);
+      setSortDir("desc");
+    }
+  }, [sortBy]);
 
   const resetFilters = () => {
     setPriceMin(0.5);
     setPriceMax(20);
-    setMaxFloat(10);
-    setMinVolume(500000);
-    setMinGap(5);
+    setMaxFloat(50);
+    setMinVolume(50000);
+    setMinGap(2);
     setFormerRunnersOnly(false);
   };
 
@@ -75,15 +111,52 @@ export default function Screener() {
       <section className="border-b border-border/50">
         <div className="container pt-16 pb-12">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber/10 border border-amber/20 text-amber text-xs font-mono font-medium mb-4">
-              <Search className="w-3 h-3" /> SIMULATOR
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald/10 border border-emerald/20 text-emerald text-xs font-mono font-medium mb-4">
+              <Activity className="w-3 h-3" /> LIVE DATA
             </span>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3">
               Oracle Stock Screener
             </h1>
             <p className="text-muted-foreground max-w-2xl text-lg">
-              Simulate Oracle's pre-market screening criteria against sample data. Adjust the filters to see how Oracle narrows 15,000 stocks down to 20 daily picks.
+              Real-time screening powered by Yahoo Finance. Adjust filters to narrow 200+ stocks down to Oracle-quality picks.
             </p>
+            {/* Scan stats bar */}
+            {data && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-wrap items-center gap-4 mt-4 text-xs text-muted-foreground"
+              >
+                <span className="flex items-center gap-1">
+                  <BarChart3 className="w-3 h-3 text-indigo" />
+                  {totalFetched} stocks scanned
+                </span>
+                <span className="flex items-center gap-1">
+                  <Filter className="w-3 h-3 text-emerald" />
+                  {results.length} match filters
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-amber" />
+                  {isCached ? `cached ${cacheAge}s ago` : `${(scanTimeMs / 1000).toFixed(1)}s scan time`}
+                </span>
+                {apiErrors > 0 && totalFetched > 0 && (
+                  <span className="flex items-center gap-1 text-amber">
+                    <AlertCircle className="w-3 h-3" />
+                    {apiErrors} API errors (partial data)
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => refetch()}
+                  disabled={isRefetching}
+                  className="h-6 text-xs gap-1 text-muted-foreground hover:text-foreground"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isRefetching ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -141,7 +214,7 @@ export default function Screener() {
                     value={[maxFloat]}
                     onValueChange={([v]) => setMaxFloat(v)}
                     min={1}
-                    max={50}
+                    max={500}
                     step={1}
                     className="mt-2"
                   />
@@ -151,7 +224,7 @@ export default function Screener() {
                 <div>
                   <Label className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
                     <span>Min Volume</span>
-                    <span className="font-mono text-foreground">{(minVolume / 1000).toFixed(0)}K</span>
+                    <span className="font-mono text-foreground">{formatVolume(minVolume)}</span>
                   </Label>
                   <Slider
                     value={[minVolume]}
@@ -163,17 +236,17 @@ export default function Screener() {
                   />
                 </div>
 
-                {/* Min Gap % */}
+                {/* Min Gap / Change % */}
                 <div>
                   <Label className="text-xs text-muted-foreground mb-2 flex items-center justify-between">
-                    <span>Min Gap %</span>
+                    <span>Min Gap / Change %</span>
                     <span className="font-mono text-foreground">{minGap}%</span>
                   </Label>
                   <Slider
                     value={[minGap]}
                     onValueChange={([v]) => setMinGap(v)}
-                    min={1}
-                    max={100}
+                    min={0}
+                    max={50}
                     step={1}
                     className="mt-2"
                   />
@@ -216,11 +289,11 @@ export default function Screener() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Volume</span>
-                    <span className="font-mono text-foreground">&gt; 5K (pre)</span>
+                    <span className="font-mono text-foreground">&gt; 50K</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Gap</span>
-                    <span className="font-mono text-foreground">&gt; 5%</span>
+                    <span className="text-muted-foreground">Gap / Change</span>
+                    <span className="font-mono text-foreground">&gt; 2%</span>
                   </div>
                 </div>
               </CardContent>
@@ -232,79 +305,218 @@ export default function Screener() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-heading font-semibold text-lg flex items-center gap-2">
                 Scan Results
-                <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">
-                  {filtered.length} / {mockStocks.length}
-                </span>
+                {!isLoading && (
+                  <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-0.5 rounded">
+                    {results.length} / {totalFetched}
+                  </span>
+                )}
               </h2>
+              {/* Sort controls */}
+              {results.length > 0 && (
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="text-muted-foreground mr-1">Sort:</span>
+                  {(["oracleScore", "gapPercent", "volume", "price"] as const).map(col => (
+                    <Button
+                      key={col}
+                      variant={sortBy === col ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => toggleSort(col)}
+                      className="h-6 text-xs px-2"
+                    >
+                      {col === "oracleScore" ? "Score" : col === "gapPercent" ? "Gap" : col === "volume" ? "Vol" : "Price"}
+                      {sortBy === col && (sortDir === "desc" ? " ↓" : " ↑")}
+                    </Button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {filtered.length > 0 ? (
+            {/* Loading state */}
+            {isLoading && (
+              <Card className="bg-card border-border/60">
+                <CardContent className="p-16 text-center">
+                  <Loader2 className="w-10 h-10 text-indigo animate-spin mx-auto mb-4" />
+                  <h3 className="font-heading font-semibold text-lg mb-2">Scanning Live Market Data</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                    Fetching real-time prices from Yahoo Finance for 200+ tickers. This typically takes 30-60 seconds.
+                  </p>
+                  <div className="mt-4 flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald animate-pulse" />
+                    <span className="text-xs text-muted-foreground font-mono">Live connection active</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Refetching overlay */}
+            {isRefetching && !isLoading && (
+              <div className="mb-3 flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="w-3 h-3 animate-spin text-indigo" />
+                Refreshing live data...
+              </div>
+            )}
+
+            {/* Error state */}
+            {error && !isLoading && (
+              <Card className="bg-card border-rose/20">
+                <CardContent className="p-12 text-center">
+                  <AlertCircle className="w-10 h-10 text-rose mx-auto mb-4" />
+                  <h3 className="font-heading font-semibold text-lg mb-2 text-rose">Scan Failed</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-4">
+                    {error.message || "Failed to fetch live market data. The market may be closed or the API may be temporarily unavailable."}
+                  </p>
+                  <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1">
+                    <RefreshCw className="w-3 h-3" /> Retry Scan
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Rate limited warning */}
+            {isRateLimited && !error && (
+              <Card className="bg-card border-amber/30">
+                <CardContent className="p-12 text-center">
+                  <AlertCircle className="w-10 h-10 text-amber mx-auto mb-4" />
+                  <h3 className="font-heading font-semibold text-lg mb-2 text-amber">API Rate Limited</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
+                    The Yahoo Finance API has temporarily hit its usage limit. Data will be available again shortly.
+                    Try refreshing in a few minutes.
+                  </p>
+                  <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1">
+                    <RefreshCw className="w-3 h-3" /> Retry Scan
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Results table */}
+            {!isLoading && !error && sorted.length > 0 && (
               <div className="space-y-2">
                 {/* Table Header */}
                 <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-2 text-xs font-heading font-semibold text-muted-foreground">
                   <div className="col-span-2">Ticker</div>
                   <div className="col-span-1">Price</div>
                   <div className="col-span-1">Gap %</div>
+                  <div className="col-span-1">Change %</div>
                   <div className="col-span-2">Volume</div>
                   <div className="col-span-1">Float</div>
-                  <div className="col-span-2">Catalyst</div>
-                  <div className="col-span-1">Sector</div>
+                  <div className="col-span-1">Rel Vol</div>
+                  <div className="col-span-1">Score</div>
                   <div className="col-span-2">Signal</div>
                 </div>
 
-                {filtered.map((stock, i) => (
-                  <motion.div
-                    key={stock.ticker}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                  >
-                    <Card
-                      className={`bg-card border-border/40 hover:border-border/80 transition-all ${
-                        stock.gap > 50 ? "signal-card-long glow-emerald" : "signal-card-long"
-                      }`}
+                <AnimatePresence mode="popLayout">
+                  {sorted.map((stock, i) => (
+                    <motion.div
+                      key={stock.ticker}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ delay: Math.min(i * 0.03, 0.5) }}
+                      layout
                     >
-                      <CardContent className="p-4">
-                        <div className="grid grid-cols-12 gap-2 items-center">
-                          <div className="col-span-12 sm:col-span-2 flex items-center gap-2">
-                            <span className="font-mono font-bold text-foreground">{stock.ticker}</span>
-                            {stock.formerRunner && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo/10 text-indigo">
-                                RUNNER
+                      <Card
+                        className={`bg-card border-border/40 hover:border-border/80 transition-all ${
+                          stock.oracleScore >= 50 ? (stock.bias === "LONG" ? "signal-card-long glow-emerald" : "signal-card-short glow-rose") : ""
+                        }`}
+                      >
+                        <CardContent className="p-4">
+                          <div className="grid grid-cols-12 gap-2 items-center">
+                            {/* Ticker + name */}
+                            <div className="col-span-12 sm:col-span-2 flex items-center gap-2">
+                              <span className="font-mono font-bold text-foreground">{stock.ticker}</span>
+                              {stock.formerRunner && (
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo/10 text-indigo">
+                                  RUNNER
+                                </span>
+                              )}
+                            </div>
+                            {/* Price */}
+                            <div className="col-span-4 sm:col-span-1 font-mono text-sm">${stock.price.toFixed(2)}</div>
+                            {/* Gap % */}
+                            <div className="col-span-4 sm:col-span-1">
+                              <span className={`font-mono text-sm font-medium flex items-center gap-0.5 ${
+                                stock.gapPercent > 0 ? "text-emerald" : stock.gapPercent < 0 ? "text-rose" : "text-muted-foreground"
+                              }`}>
+                                {stock.gapPercent > 0 ? <ArrowUpRight className="w-3 h-3" /> : stock.gapPercent < 0 ? <ArrowDownRight className="w-3 h-3" /> : null}
+                                {stock.gapPercent > 0 ? "+" : ""}{stock.gapPercent.toFixed(1)}%
                               </span>
+                            </div>
+                            {/* Day Change % */}
+                            <div className="col-span-4 sm:col-span-1">
+                              <span className={`font-mono text-sm font-medium ${
+                                stock.dayChangePercent > 0 ? "text-emerald" : stock.dayChangePercent < 0 ? "text-rose" : "text-muted-foreground"
+                              }`}>
+                                {stock.dayChangePercent > 0 ? "+" : ""}{stock.dayChangePercent.toFixed(1)}%
+                              </span>
+                            </div>
+                            {/* Volume */}
+                            <div className="col-span-4 sm:col-span-2 font-mono text-xs text-muted-foreground">
+                              {formatVolume(stock.volume)}
+                            </div>
+                            {/* Float */}
+                            <div className="hidden sm:block col-span-1 font-mono text-xs text-muted-foreground">
+                              {stock.floatM != null ? `${stock.floatM}M` : "—"}
+                            </div>
+                            {/* Relative Volume */}
+                            <div className="hidden sm:block col-span-1">
+                              {stock.relativeVolume != null ? (
+                                <span className={`font-mono text-xs ${stock.relativeVolume >= 2 ? "text-amber font-medium" : "text-muted-foreground"}`}>
+                                  {stock.relativeVolume}x
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
+                            </div>
+                            {/* Oracle Score */}
+                            <div className="hidden sm:block col-span-1">
+                              <span className={`font-mono text-xs font-bold px-1.5 py-0.5 rounded ${
+                                stock.oracleScore >= 60 ? "bg-emerald/15 text-emerald" :
+                                stock.oracleScore >= 40 ? "bg-amber/15 text-amber" :
+                                "bg-secondary text-muted-foreground"
+                              }`}>
+                                {stock.oracleScore}
+                              </span>
+                            </div>
+                            {/* Signal */}
+                            <div className="hidden sm:block col-span-2">
+                              <span className={`inline-flex items-center gap-1 text-xs font-mono px-2 py-1 rounded ${
+                                stock.bias === "LONG"
+                                  ? "bg-emerald/10 text-emerald"
+                                  : "bg-rose/10 text-rose"
+                              }`}>
+                                {stock.bias === "LONG" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                {stock.bias}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Mobile-only extra info */}
+                          <div className="sm:hidden mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className={`font-mono font-bold ${
+                              stock.oracleScore >= 60 ? "text-emerald" : stock.oracleScore >= 40 ? "text-amber" : ""
+                            }`}>
+                              Score: {stock.oracleScore}
+                            </span>
+                            <span className={`inline-flex items-center gap-0.5 font-mono ${
+                              stock.bias === "LONG" ? "text-emerald" : "text-rose"
+                            }`}>
+                              {stock.bias === "LONG" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                              {stock.bias}
+                            </span>
+                            {stock.relativeVolume != null && stock.relativeVolume >= 2 && (
+                              <span className="text-amber font-mono">{stock.relativeVolume}x vol</span>
                             )}
                           </div>
-                          <div className="col-span-4 sm:col-span-1 font-mono text-sm">${stock.price.toFixed(2)}</div>
-                          <div className="col-span-4 sm:col-span-1">
-                            <span className={`font-mono text-sm font-medium flex items-center gap-0.5 ${stock.gap > 50 ? "text-emerald" : "text-emerald/70"}`}>
-                              <ArrowUpRight className="w-3 h-3" />
-                              {stock.gap.toFixed(1)}%
-                            </span>
-                          </div>
-                          <div className="col-span-4 sm:col-span-2 font-mono text-xs text-muted-foreground">
-                            {(stock.volume / 1000000).toFixed(1)}M
-                          </div>
-                          <div className="hidden sm:block col-span-1 font-mono text-xs text-muted-foreground">
-                            {stock.float.toFixed(1)}M
-                          </div>
-                          <div className="hidden sm:block col-span-2 text-xs text-muted-foreground">
-                            {stock.catalyst}
-                          </div>
-                          <div className="hidden sm:block col-span-1 text-xs text-muted-foreground">
-                            {stock.sector}
-                          </div>
-                          <div className="hidden sm:block col-span-2">
-                            <span className="inline-flex items-center gap-1 text-xs font-mono px-2 py-1 rounded bg-emerald/10 text-emerald">
-                              <TrendingUp className="w-3 h-3" /> LONG
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
-            ) : (
+            )}
+
+            {/* Empty state */}
+            {!isLoading && !error && sorted.length === 0 && data && (
               <Card className="bg-card border-border/60 border-dashed">
                 <CardContent className="p-12 text-center">
                   <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
@@ -312,7 +524,7 @@ export default function Screener() {
                     No Stocks Match
                   </h3>
                   <p className="text-sm text-muted-foreground/60 max-w-sm mx-auto">
-                    Your filters are too restrictive. Try loosening the criteria to see more results.
+                    Your filters are too restrictive. Try loosening the criteria or adjusting the price range to see more results.
                   </p>
                   <Button variant="outline" size="sm" onClick={resetFilters} className="mt-4 gap-1">
                     <RotateCcw className="w-3 h-3" /> Reset Filters
@@ -321,14 +533,13 @@ export default function Screener() {
               </Card>
             )}
 
-            {/* Info Note */}
+            {/* Disclaimer */}
             <div className="mt-6 p-4 rounded-lg bg-amber/5 border border-amber/15">
               <p className="text-xs text-muted-foreground flex items-start gap-2">
-                <Info className="w-4 h-4 text-amber shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
                 <span>
-                  This screener uses simulated sample data for demonstration purposes. In a production implementation,
-                  you would connect to a real-time market data API (such as Yahoo Finance, Polygon.io, or Alpha Vantage)
-                  to scan live pre-market data against these Oracle-derived criteria.
+                  This screener displays real-time market data from Yahoo Finance. Data may be delayed up to 15 minutes during market hours.
+                  Oracle scores and bias signals are for research purposes only — not financial advice.
                 </span>
               </p>
             </div>

@@ -12,6 +12,75 @@ import {
   upsertNotificationPrefs,
 } from "./scanDb";
 import { executeScanRun } from "./scanRunner";
+import {
+  fetchStockData,
+  UNIQUE_UNIVERSE,
+  calculateOracleScore,
+  determineBias,
+  type StockChartData,
+} from "./oracleScanner";
+
+// ── Server-side cache for screener data ──
+// Caches the raw fetched stock data for 5 minutes to reduce API calls.
+// Filters are applied on top of cached data, so changing filters is instant.
+interface ScreenerCache {
+  stocks: StockChartData[];
+  fetchedAt: number;
+  fetchCount: number;
+  errorCount: number;
+}
+
+let screenerCache: ScreenerCache | null = null;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+async function getScreenerStocks(): Promise<ScreenerCache> {
+  // Return cached data if still fresh
+  if (screenerCache && (Date.now() - screenerCache.fetchedAt) < CACHE_TTL_MS) {
+    console.log(`[Screener] Using cached data (${screenerCache.stocks.length} stocks, age: ${((Date.now() - screenerCache.fetchedAt) / 1000).toFixed(0)}s)`);
+    return screenerCache;
+  }
+
+  console.log(`[Screener] Fetching fresh data for ${UNIQUE_UNIVERSE.length} tickers...`);
+  const startTime = Date.now();
+
+  const batchSize = 10;
+  const allStocks: StockChartData[] = [];
+  let errorCount = 0;
+
+  for (let i = 0; i < UNIQUE_UNIVERSE.length; i += batchSize) {
+    const batch = UNIQUE_UNIVERSE.slice(i, i + batchSize);
+    const results = await Promise.all(batch.map(fetchStockData));
+    for (const r of results) {
+      if (r) allStocks.push(r);
+      else errorCount++;
+    }
+    // If we're getting all errors (rate limited), stop early to save time
+    if (errorCount > 20 && allStocks.length === 0) {
+      console.warn(`[Screener] API appears rate-limited after ${errorCount} failures. Stopping early.`);
+      break;
+    }
+    if (i + batchSize < UNIQUE_UNIVERSE.length) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+
+  const scanTime = Date.now() - startTime;
+  console.log(`[Screener] Fetch complete in ${(scanTime / 1000).toFixed(1)}s. ${allStocks.length} stocks fetched, ${errorCount} errors.`);
+
+  const cache: ScreenerCache = {
+    stocks: allStocks,
+    fetchedAt: Date.now(),
+    fetchCount: allStocks.length,
+    errorCount,
+  };
+
+  // Only cache if we got some results (don't cache empty results from rate limiting)
+  if (allStocks.length > 0) {
+    screenerCache = cache;
+  }
+
+  return cache;
+}
 
 export const appRouter = router({
   system: systemRouter,
@@ -59,6 +128,104 @@ export const appRouter = router({
         notified: result.notified,
       };
     }),
+  }),
+
+  // ── Live Screener ──
+  screener: router({
+    /** Fetch live stock data for the screener with server-side filtering.
+     *  Uses a 5-minute server-side cache to reduce API calls.
+     *  Filters are applied on top of cached data for instant results. */
+    scan: publicProcedure
+      .input(
+        z.object({
+          priceMin: z.number().min(0).default(0.5),
+          priceMax: z.number().max(1000).default(20),
+          minVolume: z.number().min(0).default(50000),
+          minGap: z.number().min(0).default(2),
+          maxFloat: z.number().min(0).default(50),
+          formerRunnersOnly: z.boolean().default(false),
+        }).optional()
+      )
+      .query(async ({ input }) => {
+        const priceMin = input?.priceMin ?? 0.5;
+        const priceMax = input?.priceMax ?? 20;
+        const minVolume = input?.minVolume ?? 50000;
+        const minGap = input?.minGap ?? 2;
+        const maxFloatM = input?.maxFloat ?? 50;
+        const formerRunnersOnly = input?.formerRunnersOnly ?? false;
+
+        const startTime = Date.now();
+        const cache = await getScreenerStocks();
+
+        // Apply user filters on cached data
+        const filtered = cache.stocks.filter(stock => {
+          if (stock.currentPrice < priceMin || stock.currentPrice > priceMax) return false;
+          if (stock.volume < minVolume) return false;
+          if (Math.abs(stock.gapPercent) < minGap && Math.abs(stock.dayChangePercent) < minGap) return false;
+
+          // Float filter (estimate from market cap / price, in millions)
+          const estFloatM = stock.marketCap > 0 && stock.currentPrice > 0
+            ? (stock.marketCap / stock.currentPrice) / 1_000_000
+            : 999; // unknown float passes unless filter is strict
+          if (estFloatM > maxFloatM && stock.marketCap > 0) return false;
+
+          // Former runner: 52-week range > 100%
+          if (formerRunnersOnly) {
+            const rangePercent = stock.fiftyTwoWeekLow > 0
+              ? ((stock.fiftyTwoWeekHigh - stock.fiftyTwoWeekLow) / stock.fiftyTwoWeekLow) * 100
+              : 0;
+            if (rangePercent < 100) return false;
+          }
+
+          return true;
+        });
+
+        // Score, determine bias, and sort
+        const results = filtered.map(stock => {
+          const score = calculateOracleScore(stock);
+          const bias = determineBias(stock);
+          const estFloatM = stock.marketCap > 0 && stock.currentPrice > 0
+            ? +((stock.marketCap / stock.currentPrice) / 1_000_000).toFixed(1)
+            : null;
+          const relativeVolume = stock.avgVolume > 0 ? +(stock.volume / stock.avgVolume).toFixed(1) : null;
+          const rangePercent = stock.fiftyTwoWeekLow > 0
+            ? +((stock.fiftyTwoWeekHigh - stock.fiftyTwoWeekLow) / stock.fiftyTwoWeekLow * 100).toFixed(0)
+            : 0;
+
+          return {
+            ticker: stock.symbol,
+            companyName: stock.companyName || stock.symbol,
+            price: stock.currentPrice,
+            gapPercent: +stock.gapPercent.toFixed(1),
+            dayChangePercent: +stock.dayChangePercent.toFixed(1),
+            volume: stock.volume,
+            avgVolume: stock.avgVolume,
+            relativeVolume,
+            floatM: estFloatM,
+            marketCap: stock.marketCap,
+            fiftyTwoWeekHigh: stock.fiftyTwoWeekHigh,
+            fiftyTwoWeekLow: stock.fiftyTwoWeekLow,
+            rangePercent: +rangePercent,
+            formerRunner: +rangePercent >= 100,
+            oracleScore: score,
+            bias,
+          };
+        });
+
+        results.sort((a, b) => b.oracleScore - a.oracleScore);
+
+        const scanTime = Date.now() - startTime;
+        const cacheAge = Math.round((Date.now() - cache.fetchedAt) / 1000);
+
+        return {
+          results,
+          totalFetched: cache.fetchCount,
+          scanTimeMs: scanTime,
+          cached: cacheAge > 1,
+          cacheAgeSeconds: cacheAge,
+          apiErrors: cache.errorCount,
+        };
+      }),
   }),
 
   // ── Notification Preferences ──

@@ -45,6 +45,14 @@
 - [x] Research available real-time stock market data APIs
 - [x] Update oracleScanner.ts to fetch live market data (prices, volume, gaps, market cap, float)
 - [x] Expand the scan universe to cover more tickers dynamically (200+ tickers)
-- [ ] Update the Screener page to use live data instead of sample data (kept as demo)
+- [x] Update the Screener page to use live data instead of sample data
 - [x] Test scanner with real market data end-to-end (28 tests passing)
 - [x] Verify Dashboard displays live picks correctly
+
+## Screener Live Data Integration
+- [x] Create backend tRPC screener.scan endpoint that fetches live data from Yahoo Finance
+- [x] Support server-side filtering by price range, volume, gap %, and change %
+- [x] Update Screener.tsx to call the tRPC endpoint instead of using static sample data
+- [x] Add loading states, error handling, rate-limit warning, and empty states for live data
+- [x] Write vitest tests for the screener endpoint (8 tests with mocked data)
+- [x] Verify end-to-end in browser

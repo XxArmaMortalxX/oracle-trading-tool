@@ -106,7 +106,7 @@ const SCAN_UNIVERSE = [
 ];
 
 // Deduplicate
-const UNIQUE_UNIVERSE = Array.from(new Set(SCAN_UNIVERSE));
+export const UNIQUE_UNIVERSE = Array.from(new Set(SCAN_UNIVERSE));
 
 export interface StockChartData {
   symbol: string;
@@ -155,7 +155,7 @@ export interface OraclePick {
  * Fetch real-time stock data from Yahoo Finance via the Manus Data API hub.
  * Uses the 1-month daily chart endpoint to get current price + historical data.
  */
-async function fetchStockData(symbol: string): Promise<StockChartData | null> {
+export async function fetchStockData(symbol: string): Promise<StockChartData | null> {
   try {
     const result = await callDataApi("YahooFinance/get_stock_chart", {
       query: {
@@ -233,7 +233,7 @@ async function fetchStockData(symbol: string): Promise<StockChartData | null> {
  * Oracle-style scoring algorithm (0-100)
  * Based on reverse-engineered criteria from StocksToTrade's Oracle
  */
-function calculateOracleScore(stock: StockChartData): number {
+export function calculateOracleScore(stock: StockChartData): number {
   let score = 0;
 
   // 1. Price Range Score (0-15 pts)
@@ -290,7 +290,7 @@ function calculateOracleScore(stock: StockChartData): number {
 /**
  * Determine bias (LONG or SHORT) based on Oracle methodology
  */
-function determineBias(stock: StockChartData): "LONG" | "SHORT" {
+export function determineBias(stock: StockChartData): "LONG" | "SHORT" {
   const momentumScore = stock.dayChangePercent + stock.gapPercent;
   return momentumScore >= 0 ? "LONG" : "SHORT";
 }
