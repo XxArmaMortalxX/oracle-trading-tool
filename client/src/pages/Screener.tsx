@@ -393,15 +393,16 @@ export default function Screener() {
             {!isLoading && !error && sorted.length > 0 && (
               <div className="space-y-2">
                 {/* Table Header */}
-                <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-2 text-xs font-heading font-semibold text-muted-foreground">
+                <div className="hidden sm:grid grid-cols-14 gap-2 px-4 py-2 text-xs font-heading font-semibold text-muted-foreground" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
                   <div className="col-span-2">Ticker</div>
                   <div className="col-span-1">Price</div>
                   <div className="col-span-1">Gap %</div>
-                  <div className="col-span-1">Change %</div>
+                  <div className="col-span-1">Chg %</div>
                   <div className="col-span-2">Volume</div>
                   <div className="col-span-1">Float</div>
                   <div className="col-span-1">Rel Vol</div>
                   <div className="col-span-1">Score</div>
+                  <div className="col-span-2">Sentiment</div>
                   <div className="col-span-2">Signal</div>
                 </div>
 
@@ -421,7 +422,7 @@ export default function Screener() {
                         }`}
                       >
                         <CardContent className="p-4">
-                          <div className="grid grid-cols-12 gap-2 items-center">
+                          <div className="grid items-center gap-2" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
                             {/* Ticker + name */}
                             <div className="col-span-12 sm:col-span-2 flex items-center gap-2">
                               <span className="font-mono font-bold text-foreground">{stock.ticker}</span>
@@ -478,6 +479,33 @@ export default function Screener() {
                                 {stock.oracleScore}
                               </span>
                             </div>
+                            {/* Sentiment */}
+                            <div className="hidden sm:block col-span-2">
+                              {stock.sentimentLabel ? (
+                                <span
+                                  className={`inline-flex items-center gap-1 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full ${
+                                    stock.sentimentLabel === "Strong Bullish"
+                                      ? "bg-emerald/15 text-emerald border border-emerald/20"
+                                      : stock.sentimentLabel === "Bullish"
+                                      ? "bg-emerald/10 text-emerald"
+                                      : stock.sentimentLabel === "Neutral"
+                                      ? "bg-secondary text-muted-foreground"
+                                      : stock.sentimentLabel === "Bearish"
+                                      ? "bg-rose/10 text-rose"
+                                      : "bg-rose/15 text-rose border border-rose/20"
+                                  }`}
+                                >
+                                  {stock.sentimentLabel === "Strong Bullish" || stock.sentimentLabel === "Bullish" ? (
+                                    <TrendingUp className="w-2.5 h-2.5" />
+                                  ) : stock.sentimentLabel === "Bearish" || stock.sentimentLabel === "Strong Bearish" ? (
+                                    <TrendingDown className="w-2.5 h-2.5" />
+                                  ) : null}
+                                  {stock.sentimentLabel}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground/40">—</span>
+                              )}
+                            </div>
                             {/* Signal */}
                             <div className="hidden sm:block col-span-2">
                               <span className={`inline-flex items-center gap-1 text-xs font-mono px-2 py-1 rounded ${
@@ -505,6 +533,14 @@ export default function Screener() {
                             </span>
                             {stock.relativeVolume != null && stock.relativeVolume >= 2 && (
                               <span className="text-amber font-mono">{stock.relativeVolume}x vol</span>
+                            )}
+                            {stock.sentimentLabel && (
+                              <span className={`font-mono ${
+                                stock.sentimentLabel.includes("Bullish") ? "text-emerald" :
+                                stock.sentimentLabel.includes("Bearish") ? "text-rose" : "text-muted-foreground"
+                              }`}>
+                                {stock.sentimentLabel}
+                              </span>
                             )}
                           </div>
                         </CardContent>

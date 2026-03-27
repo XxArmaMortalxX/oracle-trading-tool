@@ -66,3 +66,16 @@
 - [x] Add loading state feedback when refreshing (spinner + "Scanning Market" badge)
 - [x] Test refresh functionality end-to-end (curl verified: session #30005, #30006)
 - [x] Write/update tests for the refresh flow (2 new tests, 38 total passing)
+
+## Sentiment Data Integration
+- [x] Research free sentiment APIs (StockTwits blocked by Cloudflare, Finnhub needs key, Data API quota limited)
+- [x] Build Technical Sentiment Engine (sentimentEngine.ts) — derives sentiment from price action data
+- [x] Add sentimentScore and sentimentLabel columns to scan_picks DB table (migration applied)
+- [x] Integrate sentiment into oracleScanner.ts (computed per pick during scan)
+- [x] Store sentiment in DB via scanRunner.ts
+- [x] Display sentiment badges on Dashboard Live Picks table (color-coded with icons)
+- [x] Display sentiment on Screener results (new column with badges)
+- [x] Sentiment engine analyzes: momentum, volume conviction, gap, 52-week position, intraday strength
+- [x] Write 20 comprehensive sentiment engine tests (sentimentEngine.test.ts)
+- [x] All 58 tests passing across 5 test files
+- [x] Verify end-to-end: 20 picks with sentiment scores (-60 to +12) displayed correctly

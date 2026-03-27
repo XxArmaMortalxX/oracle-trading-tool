@@ -19,6 +19,7 @@ import {
   determineBias,
   type StockChartData,
 } from "./oracleScanner";
+import { computeSentiment, type SentimentResult } from "./sentimentEngine";
 
 // ── Server-side cache for screener data ──
 // Caches the raw fetched stock data for 5 minutes to reduce API calls.
@@ -204,6 +205,9 @@ export const appRouter = router({
             ? +((stock.fiftyTwoWeekHigh - stock.fiftyTwoWeekLow) / stock.fiftyTwoWeekLow * 100).toFixed(0)
             : 0;
 
+          // Compute sentiment from price action data
+          const sentiment = computeSentiment(stock);
+
           return {
             ticker: stock.symbol,
             companyName: stock.companyName || stock.symbol,
@@ -221,6 +225,9 @@ export const appRouter = router({
             formerRunner: +rangePercent >= 100,
             oracleScore: score,
             bias,
+            sentimentScore: sentiment.score,
+            sentimentLabel: sentiment.label,
+            sentimentComponents: sentiment.components,
           };
         });
 

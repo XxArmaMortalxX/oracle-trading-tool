@@ -290,6 +290,7 @@ export default function Dashboard() {
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">R/R</th>
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">GAP %</th>
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">VOLUME</th>
+                    <th className="text-center py-3 px-3 text-xs font-mono text-muted-foreground font-medium">SENTIMENT</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,6 +371,33 @@ export default function Dashboard() {
                       </td>
                       <td className="py-3 px-3 text-right font-mono text-xs text-muted-foreground">
                         {formatNumber(pick.volume)}
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        {pick.sentimentLabel ? (
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full ${
+                              pick.sentimentLabel === "Strong Bullish"
+                                ? "bg-emerald/15 text-emerald border border-emerald/20"
+                                : pick.sentimentLabel === "Bullish"
+                                ? "bg-emerald/10 text-emerald"
+                                : pick.sentimentLabel === "Neutral"
+                                ? "bg-secondary text-muted-foreground"
+                                : pick.sentimentLabel === "Bearish"
+                                ? "bg-rose/10 text-rose"
+                                : "bg-rose/15 text-rose border border-rose/20"
+                            }`}
+                          >
+                            {pick.sentimentLabel === "Strong Bullish" || pick.sentimentLabel === "Bullish" ? (
+                              <TrendingUp className="w-2.5 h-2.5" />
+                            ) : pick.sentimentLabel === "Bearish" || pick.sentimentLabel === "Strong Bearish" ? (
+                              <TrendingDown className="w-2.5 h-2.5" />
+                            ) : null}
+                            {pick.sentimentLabel}
+                            <span className="opacity-60">({pick.sentimentScore ?? 0})</span>
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground/40">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}

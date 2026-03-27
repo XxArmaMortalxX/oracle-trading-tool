@@ -75,6 +75,8 @@ export async function executeScanRun(options?: { force?: boolean }): Promise<{
           support: p.support,
           resistance: p.resistance,
           reasoning: p.reasoning,
+          sentimentScore: p.sentimentScore,
+          sentimentLabel: p.sentimentLabel,
         }))
       );
     }

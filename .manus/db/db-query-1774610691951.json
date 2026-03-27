@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `scan_picks` ADD `sentimentScore` int DEFAULT 0;\nALTER TABLE `scan_picks` ADD `sentimentLabel` varchar(20);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Qj6fKXQHVGPC1t4.root --database m2P5JbZGgAh2LKnMXcJ4ZE --execute ALTER TABLE `scan_picks` ADD `sentimentScore` int DEFAULT 0;\nALTER TABLE `scan_picks` ADD `sentimentLabel` varchar(20);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 795
+}

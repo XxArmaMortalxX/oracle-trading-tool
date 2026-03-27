@@ -59,6 +59,8 @@ export const scanPicks = mysqlTable("scan_picks", {
   support: float("support"),
   resistance: float("resistance"),
   reasoning: text("reasoning"),
+  sentimentScore: int("sentimentScore").default(0),
+  sentimentLabel: varchar("sentimentLabel", { length: 20 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

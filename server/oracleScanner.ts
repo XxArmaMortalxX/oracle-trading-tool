@@ -12,6 +12,7 @@
  * 6. Return top 20 picks sorted by score
  */
 import { callDataApi } from "./_core/dataApi";
+import { computeSentiment, type SentimentLabel } from "./sentimentEngine";
 
 // ── Oracle Screening Criteria (from reverse engineering) ──
 const ORACLE_CRITERIA = {
@@ -149,6 +150,8 @@ export interface OraclePick {
   support: number;
   resistance: number;
   reasoning: string;
+  sentimentScore: number;
+  sentimentLabel: SentimentLabel;
 }
 
 /**
@@ -430,6 +433,9 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
       ? Math.round(stock.marketCap / stock.currentPrice)
       : null;
 
+    // Compute sentiment from price action data
+    const sentiment = computeSentiment(stock);
+
     return {
       ticker: stock.symbol,
       companyName: stock.companyName || stock.symbol,
@@ -451,6 +457,8 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
       support: signals.support,
       resistance: signals.resistance,
       reasoning: generateReasoning(stock, score, bias),
+      sentimentScore: sentiment.score,
+      sentimentLabel: sentiment.label,
     } satisfies OraclePick;
   });
 
