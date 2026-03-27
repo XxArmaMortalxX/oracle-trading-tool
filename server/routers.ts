@@ -10,6 +10,7 @@ import {
   getLatestPicks,
   getNotificationPrefs,
   upsertNotificationPrefs,
+  getPreviousSentimentByTickers,
 } from "./scanDb";
 import { executeScanRun } from "./scanRunner";
 import {
@@ -19,7 +20,7 @@ import {
   determineBias,
   type StockChartData,
 } from "./oracleScanner";
-import { computeSentiment, type SentimentResult } from "./sentimentEngine";
+import { computeSentiment, computeSentimentTrend, type SentimentResult, type SentimentTrendResult } from "./sentimentEngine";
 
 // ── Server-side cache for screener data ──
 // Caches the raw fetched stock data for 5 minutes to reduce API calls.
@@ -115,9 +116,33 @@ export const appRouter = router({
         return getPicksBySessionId(input.sessionId);
       }),
 
-    /** Get the latest picks (most recent completed scan) */
+    /** Get the latest picks (most recent completed scan) with sentiment trends */
     latestPicks: publicProcedure.query(async () => {
-      return getLatestPicks();
+      const picks = await getLatestPicks();
+      if (picks.length === 0) return [];
+
+      // Get previous sentiment for trend arrows
+      const sessionId = picks[0].sessionId;
+      const tickers = picks.map(p => p.ticker);
+      const previousSentiments = await getPreviousSentimentByTickers(tickers, sessionId);
+
+      return picks.map(p => {
+        const prev = previousSentiments.get(p.ticker);
+        const trend = computeSentimentTrend(
+          p.sentimentScore ?? 0,
+          (p.sentimentLabel as any) ?? "Neutral",
+          prev?.score ?? null,
+          prev?.label ?? null,
+        );
+        return {
+          ...p,
+          sentimentTrend: trend.trend,
+          sentimentDelta: trend.delta,
+          sentimentTransition: trend.transition,
+          previousSentimentLabel: trend.previousLabel,
+          previousSentimentScore: trend.previousScore,
+        };
+      });
     }),
 
     /** Manually trigger a scan (admin only) — always forces a fresh scan */
@@ -131,14 +156,30 @@ export const appRouter = router({
     }),
 
     /** Refresh live picks — fetches fresh real-time data from Yahoo Finance.
-     *  Forces a new scan even if one already ran today. */
+     *  Forces a new scan even if one already ran today.
+     *  Returns trend data for each pick. */
     refreshPicks: publicProcedure.mutation(async () => {
       console.log(`[Dashboard] Refresh picks requested — forcing live scan...`);
       const result = await executeScanRun({ force: true });
+
+      // Convert trends Map to a serializable object
+      const trendsObj: Record<string, { trend: string; delta: number | null; transition: string | null; previousLabel: string | null }> = {};
+      if (result.trends) {
+        for (const [ticker, t] of Array.from(result.trends.entries())) {
+          trendsObj[ticker] = {
+            trend: t.trend,
+            delta: t.delta,
+            transition: t.transition,
+            previousLabel: t.previousLabel,
+          };
+        }
+      }
+
       return {
         sessionId: result.sessionId,
         picksCount: result.picks.length,
         success: true,
+        trends: trendsObj,
       };
     }),
   }),
@@ -233,11 +274,35 @@ export const appRouter = router({
 
         results.sort((a, b) => b.oracleScore - a.oracleScore);
 
+        // Enrich with sentiment trends from DB history
+        const tickers = results.map(r => r.ticker);
+        let previousSentiments = new Map<string, { score: number; label: string; createdAt: Date }>();
+        try {
+          previousSentiments = await getPreviousSentimentByTickers(tickers);
+        } catch { /* DB may not be available in tests */ }
+
+        const enrichedResults = results.map(r => {
+          const prev = previousSentiments.get(r.ticker);
+          const trend = computeSentimentTrend(
+            r.sentimentScore,
+            r.sentimentLabel as any,
+            prev?.score ?? null,
+            prev?.label ?? null,
+          );
+          return {
+            ...r,
+            sentimentTrend: trend.trend,
+            sentimentDelta: trend.delta,
+            sentimentTransition: trend.transition,
+            previousSentimentLabel: trend.previousLabel,
+          };
+        });
+
         const scanTime = Date.now() - startTime;
         const cacheAge = Math.round((Date.now() - cache.fetchedAt) / 1000);
 
         return {
-          results,
+          results: enrichedResults,
           totalFetched: cache.fetchCount,
           scanTimeMs: scanTime,
           cached: cacheAge > 1,

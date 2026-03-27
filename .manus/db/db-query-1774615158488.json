@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `sentiment_history` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`ticker` varchar(10) NOT NULL,\n\t`sentimentScore` int NOT NULL,\n\t`sentimentLabel` varchar(20) NOT NULL,\n\t`sessionId` int,\n\t`components` text,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `sentiment_history_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Qj6fKXQHVGPC1t4.root --database m2P5JbZGgAh2LKnMXcJ4ZE --execute CREATE TABLE `sentiment_history` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`ticker` varchar(10) NOT NULL,\n\t`sentimentScore` int NOT NULL,\n\t`sentimentLabel` varchar(20) NOT NULL,\n\t`sessionId` int,\n\t`components` text,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `sentiment_history_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 426
+}

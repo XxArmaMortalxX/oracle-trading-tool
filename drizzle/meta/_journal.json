@@ -22,6 +22,13 @@
       "when": 1774610681036,
       "tag": "0002_legal_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1774615138132,
+      "tag": "0003_eminent_wrecker",
+      "breakpoints": true
     }
   ]
 }

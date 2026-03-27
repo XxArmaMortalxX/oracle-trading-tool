@@ -402,7 +402,8 @@ export default function Screener() {
                   <div className="col-span-1">Float</div>
                   <div className="col-span-1">Rel Vol</div>
                   <div className="col-span-1">Score</div>
-                  <div className="col-span-2">Sentiment</div>
+                  <div className="col-span-1">Sentiment</div>
+                  <div className="col-span-1">Trend</div>
                   <div className="col-span-2">Signal</div>
                 </div>
 
@@ -480,7 +481,7 @@ export default function Screener() {
                               </span>
                             </div>
                             {/* Sentiment */}
-                            <div className="hidden sm:block col-span-2">
+                            <div className="hidden sm:block col-span-1">
                               {stock.sentimentLabel ? (
                                 <span
                                   className={`inline-flex items-center gap-1 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full ${
@@ -504,6 +505,39 @@ export default function Screener() {
                                 </span>
                               ) : (
                                 <span className="text-xs text-muted-foreground/40">—</span>
+                              )}
+                            </div>
+                            {/* Sentiment Trend Arrow */}
+                            <div className="hidden sm:block col-span-1">
+                              {(stock as any).sentimentTrend ? (
+                                <div className="flex flex-col items-start gap-0.5">
+                                  <span
+                                    className={`inline-flex items-center gap-0.5 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-full ${
+                                      (stock as any).sentimentTrend === "improving"
+                                        ? "bg-emerald/15 text-emerald border border-emerald/20"
+                                        : (stock as any).sentimentTrend === "declining"
+                                        ? "bg-rose/15 text-rose border border-rose/20"
+                                        : "bg-secondary/60 text-muted-foreground"
+                                    }`}
+                                  >
+                                    {(stock as any).sentimentTrend === "improving" ? (
+                                      <>↑+{(stock as any).sentimentDelta}</>
+                                    ) : (stock as any).sentimentTrend === "declining" ? (
+                                      <>↓{(stock as any).sentimentDelta}</>
+                                    ) : (
+                                      <>→ 0</>
+                                    )}
+                                  </span>
+                                  {(stock as any).sentimentTransition && (
+                                    <span className="text-[9px] font-mono text-muted-foreground/70 whitespace-nowrap">
+                                      {(stock as any).sentimentTransition}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-mono text-muted-foreground/40 px-1.5 py-0.5 rounded-full bg-secondary/30">
+                                  NEW
+                                </span>
                               )}
                             </div>
                             {/* Signal */}

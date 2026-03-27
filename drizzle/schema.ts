@@ -82,3 +82,21 @@ export const notificationPreferences = mysqlTable("notification_preferences", {
 
 export type NotificationPreference = typeof notificationPreferences.$inferSelect;
 export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
+
+// ── Sentiment History ──
+// Stores per-ticker sentiment snapshots for trend tracking.
+// Each scan writes one row per ticker so we can compute improving/declining/stable trends.
+
+export const sentimentHistory = mysqlTable("sentiment_history", {
+  id: int("id").autoincrement().primaryKey(),
+  ticker: varchar("ticker", { length: 10 }).notNull(),
+  sentimentScore: int("sentimentScore").notNull(),
+  sentimentLabel: varchar("sentimentLabel", { length: 20 }).notNull(),
+  sessionId: int("sessionId"),
+  /** JSON string of component scores for detailed analysis */
+  components: text("components"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SentimentHistoryRow = typeof sentimentHistory.$inferSelect;
+export type InsertSentimentHistory = typeof sentimentHistory.$inferInsert;

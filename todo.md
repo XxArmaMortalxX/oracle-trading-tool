@@ -79,3 +79,17 @@
 - [x] Write 20 comprehensive sentiment engine tests (sentimentEngine.test.ts)
 - [x] All 58 tests passing across 5 test files
 - [x] Verify end-to-end: 20 picks with sentiment scores (-60 to +12) displayed correctly
+
+## Sentiment Trend Arrows
+- [x] Create sentiment_history DB table with ticker index (migration 0003 applied)
+- [x] Add getPreviousSentimentByTickers and storeSentimentSnapshots helpers to scanDb.ts
+- [x] Update scanRunner to store sentiment snapshots after each scan
+- [x] Build computeSentimentTrend function in sentimentEngine.ts (improving/declining/stable + delta)
+- [x] Add sentimentTrend, sentimentDelta, sentimentTransition fields to pick data
+- [x] Enrich Dashboard latestPicks and refreshPicks with trend data from DB history
+- [x] Display trend arrows on Dashboard picks table (↑/↓/→ with color-coded badges + transitions)
+- [x] Enrich Screener results with trend data by comparing against DB history
+- [x] Display trend arrows on Screener results (new Trend column)
+- [x] Show transition labels (e.g., "Neutral → Bullish")
+- [x] All 58 tests passing across 5 test files
+- [x] Verified end-to-end: live scan stores history, trends computed correctly

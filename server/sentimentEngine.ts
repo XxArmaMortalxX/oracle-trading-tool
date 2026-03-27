@@ -196,6 +196,78 @@ function scoreToLabel(score: number): SentimentLabel {
  * Compute the full sentiment analysis for a stock.
  * Uses only data already available from the Yahoo Finance chart endpoint.
  */
+// ── Sentiment Trend Computation ──
+
+export type SentimentTrend = "improving" | "declining" | "stable";
+
+export interface SentimentTrendResult {
+  /** Current sentiment score */
+  currentScore: number;
+  /** Current sentiment label */
+  currentLabel: SentimentLabel;
+  /** Previous sentiment score (null if no history) */
+  previousScore: number | null;
+  /** Previous sentiment label (null if no history) */
+  previousLabel: SentimentLabel | null;
+  /** Score delta (current - previous, null if no history) */
+  delta: number | null;
+  /** Trend direction */
+  trend: SentimentTrend;
+  /** Human-readable transition string, e.g. "Neutral → Bullish" */
+  transition: string | null;
+}
+
+/**
+ * Compute the sentiment trend by comparing current vs previous sentiment.
+ * A delta of ±10 or more = improving/declining; otherwise stable.
+ * Also detects label transitions (e.g., Neutral → Bullish).
+ */
+export function computeSentimentTrend(
+  currentScore: number,
+  currentLabel: SentimentLabel,
+  previousScore: number | null,
+  previousLabel: string | null,
+): SentimentTrendResult {
+  if (previousScore === null || previousLabel === null) {
+    return {
+      currentScore,
+      currentLabel,
+      previousScore: null,
+      previousLabel: null,
+      delta: null,
+      trend: "stable",
+      transition: null,
+    };
+  }
+
+  const delta = currentScore - previousScore;
+  const prevLabel = previousLabel as SentimentLabel;
+
+  // Determine trend: ±10 threshold for meaningful change
+  let trend: SentimentTrend;
+  if (delta >= 10) trend = "improving";
+  else if (delta <= -10) trend = "declining";
+  else trend = "stable";
+
+  // If the label changed, that's always a meaningful transition
+  const labelChanged = currentLabel !== prevLabel;
+  if (labelChanged && delta > 0) trend = "improving";
+  if (labelChanged && delta < 0) trend = "declining";
+
+  // Build transition string only if label changed
+  const transition = labelChanged ? `${prevLabel} → ${currentLabel}` : null;
+
+  return {
+    currentScore,
+    currentLabel,
+    previousScore,
+    previousLabel: prevLabel,
+    delta,
+    trend,
+    transition,
+  };
+}
+
 export function computeSentiment(stock: StockChartData): SentimentResult {
   const momentum = computeMomentum(stock.prices);
   const volumeConviction = computeVolumeConviction(stock);

@@ -291,6 +291,7 @@ export default function Dashboard() {
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">GAP %</th>
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">VOLUME</th>
                     <th className="text-center py-3 px-3 text-xs font-mono text-muted-foreground font-medium">SENTIMENT</th>
+                    <th className="text-center py-3 px-3 text-xs font-mono text-muted-foreground font-medium">TREND</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -397,6 +398,39 @@ export default function Dashboard() {
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground/40">—</span>
+                        )}
+                      </td>
+                      {/* Sentiment Trend Arrow */}
+                      <td className="py-3 px-3 text-center">
+                        {(pick as any).sentimentTrend ? (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                                (pick as any).sentimentTrend === "improving"
+                                  ? "bg-emerald/15 text-emerald border border-emerald/20"
+                                  : (pick as any).sentimentTrend === "declining"
+                                  ? "bg-rose/15 text-rose border border-rose/20"
+                                  : "bg-secondary/60 text-muted-foreground"
+                              }`}
+                            >
+                              {(pick as any).sentimentTrend === "improving" ? (
+                                <>↑ +{(pick as any).sentimentDelta}</>
+                              ) : (pick as any).sentimentTrend === "declining" ? (
+                                <>↓ {(pick as any).sentimentDelta}</>
+                              ) : (
+                                <>→ 0</>
+                              )}
+                            </span>
+                            {(pick as any).sentimentTransition && (
+                              <span className="text-[9px] font-mono text-muted-foreground/70 whitespace-nowrap">
+                                {(pick as any).sentimentTransition}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-muted-foreground/40 px-2 py-0.5 rounded-full bg-secondary/30">
+                            NEW
+                          </span>
                         )}
                       </td>
                     </tr>

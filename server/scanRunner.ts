@@ -11,7 +11,10 @@ import {
   updateScanSession,
   insertScanPicks,
   getScanSessionByDate,
+  insertSentimentSnapshots,
+  getPreviousSentimentByTickers,
 } from "./scanDb";
+import { computeSentimentTrend, type SentimentTrendResult } from "./sentimentEngine";
 import { notifyOwner } from "./_core/notification";
 
 /**
@@ -22,6 +25,7 @@ export async function executeScanRun(options?: { force?: boolean }): Promise<{
   sessionId: number;
   picks: OraclePick[];
   notified: boolean;
+  trends?: Map<string, SentimentTrendResult>;
 }> {
   const force = options?.force ?? false;
   const now = new Date();
@@ -49,6 +53,34 @@ export async function executeScanRun(options?: { force?: boolean }): Promise<{
   try {
     // Run the Oracle scan
     const { picks, totalScanned } = await runOracleScan(20);
+
+    // Store sentiment snapshots for trend tracking
+    if (picks.length > 0) {
+      await insertSentimentSnapshots(
+        picks.map(p => ({
+          ticker: p.ticker,
+          sentimentScore: p.sentimentScore ?? 0,
+          sentimentLabel: p.sentimentLabel ?? "Neutral",
+          sessionId,
+          components: JSON.stringify(p.sentimentComponents ?? {}),
+        }))
+      );
+    }
+
+    // Compute sentiment trends by comparing with previous snapshots
+    const tickers = picks.map(p => p.ticker);
+    const previousSentiments = await getPreviousSentimentByTickers(tickers, sessionId);
+    const trends = new Map<string, SentimentTrendResult>();
+    for (const pick of picks) {
+      const prev = previousSentiments.get(pick.ticker);
+      const trend = computeSentimentTrend(
+        pick.sentimentScore ?? 0,
+        (pick.sentimentLabel as any) ?? "Neutral",
+        prev?.score ?? null,
+        prev?.label ?? null,
+      );
+      trends.set(pick.ticker, trend);
+    }
 
     // Store picks in DB
     if (picks.length > 0) {
@@ -103,7 +135,7 @@ export async function executeScanRun(options?: { force?: boolean }): Promise<{
     });
 
     console.log(`[ScanRunner] Scan complete: ${picks.length} picks from ${totalScanned} stocks`);
-    return { sessionId, picks, notified };
+    return { sessionId, picks, notified, trends };
   } catch (err) {
     console.error("[ScanRunner] Scan failed:", err);
     await updateScanSession(sessionId, {

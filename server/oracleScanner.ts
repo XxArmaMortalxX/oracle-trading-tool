@@ -152,6 +152,13 @@ export interface OraclePick {
   reasoning: string;
   sentimentScore: number;
   sentimentLabel: SentimentLabel;
+  sentimentComponents?: {
+    momentum: number;
+    volumeConviction: number;
+    gapSentiment: number;
+    weekPosition: number;
+    intradayStrength: number;
+  };
 }
 
 /**
@@ -459,6 +466,7 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
       reasoning: generateReasoning(stock, score, bias),
       sentimentScore: sentiment.score,
       sentimentLabel: sentiment.label,
+      sentimentComponents: sentiment.components,
     } satisfies OraclePick;
   });
 
