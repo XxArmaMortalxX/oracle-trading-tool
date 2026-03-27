@@ -93,3 +93,4 @@
 - [x] Show transition labels (e.g., "Neutral → Bullish")
 - [x] All 58 tests passing across 5 test files
 - [x] Verified end-to-end: live scan stores history, trends computed correctly
+
