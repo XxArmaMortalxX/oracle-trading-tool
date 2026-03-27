@@ -41,7 +41,7 @@ const screeningCriteria = [
 const technicalIndicators = [
   { name: "VWAP", desc: "Volume Weighted Average Price — the ultimate intraday trend indicator. Above VWAP = Green bias.", weight: "Primary" },
   { name: "Relative Volume", desc: "Compares current volume to historical averages to confirm breakout legitimacy.", weight: "Primary" },
-  { name: "Pivot Points", desc: "Calculates automated Support and Resistance levels on the Oracle Bar.", weight: "Primary" },
+  { name: "Pivot Points", desc: "Calculates automated Support and Resistance levels on the Axiarch Bar.", weight: "Primary" },
   { name: "MACD", desc: "12-period EMA minus 26-period EMA with 9-period signal line for momentum.", weight: "Secondary" },
   { name: "RSI", desc: "Relative Strength Index measures overbought/oversold conditions.", weight: "Secondary" },
   { name: "Bollinger Bands", desc: "20-period SMA with 2 standard deviation bands for volatility.", weight: "Secondary" },
@@ -49,7 +49,7 @@ const technicalIndicators = [
   { name: "OBV", desc: "On-Balance Volume confirms price moves with volume flow.", weight: "Supporting" },
 ];
 
-const oracleOutputs = [
+const axiarchOutputs = [
   { label: "Bias", desc: "Green (Long) or Red (Short) directional bias based on early momentum", icon: TrendingUp, color: "text-emerald" },
   { label: "Signal Price", desc: "Exact price level the stock must cross to confirm a breakout", icon: Zap, color: "text-indigo" },
   { label: "Support & Resistance", desc: "Algorithmic calculations of bounce and selling pressure levels", icon: Activity, color: "text-amber" },
@@ -73,7 +73,7 @@ export default function Methodology() {
               <Layers className="w-3 h-3" /> DEEP DIVE
             </span>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-              Oracle Methodology
+              Axiarch Methodology
             </h1>
             <p className="text-muted-foreground max-w-2xl text-lg">
               How a "$60 million algorithm" actually works under the hood — broken down into three core engines.
@@ -103,7 +103,7 @@ export default function Methodology() {
               <motion.div variants={fadeUp} className="mb-8">
                 <h2 className="font-heading text-2xl font-bold mb-3">Engine 1: Pre-Market Quantitative Screener</h2>
                 <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                  During pre-market hours, Oracle scans the entire universe of available stocks looking for specific
+                  During pre-market hours, Axiarch scans the entire universe of available stocks looking for specific
                   quantitative criteria that have historically preceded "big percent movers." Lead trainer Tim Bohen
                   has explicitly shared the foundational criteria used to identify potential "low float runners."
                 </p>
@@ -112,7 +112,7 @@ export default function Methodology() {
               <motion.div variants={fadeUp}>
                 <Card className="bg-card border-border/60 overflow-hidden">
                   <CardHeader className="bg-secondary/30 border-b border-border/40">
-                    <CardTitle className="text-base font-heading">Oracle Screening Criteria</CardTitle>
+                    <CardTitle className="text-base font-heading">Axiarch Screening Criteria</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="overflow-x-auto">
@@ -142,7 +142,7 @@ export default function Methodology() {
               <motion.div variants={fadeUp} className="mt-6 p-4 rounded-lg bg-indigo/5 border border-indigo/15">
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-indigo">Key Insight:</span> Tim Bohen discovered that 2/3 to 3/4 of
-                  tickers he finds manually also appear on Oracle — confirming the algorithm effectively codifies
+                  tickers he finds manually also appear on Axiarch — confirming the algorithm effectively codifies
                   experienced trader intuition into systematic rules.
                 </p>
               </motion.div>
@@ -155,8 +155,8 @@ export default function Methodology() {
               <motion.div variants={fadeUp} className="mb-8">
                 <h2 className="font-heading text-2xl font-bold mb-3">Engine 2: Catalyst & Sentiment Engine</h2>
                 <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                  Perhaps the most critical revelation about Oracle's methodology comes from Tim Bohen himself.
-                  Oracle doesn't just look at price and volume — it ingests qualitative data to gauge human emotion.
+                  Perhaps the most critical revelation about Axiarch's methodology comes from Tim Bohen himself.
+                  Axiarch doesn't just look at price and volume — it ingests qualitative data to gauge human emotion.
                 </p>
               </motion.div>
 
@@ -196,7 +196,7 @@ export default function Methodology() {
                   },
                   {
                     title: "Fear & Greed Tracking",
-                    desc: "Based on Tim Sykes' 7-Step Framework, Oracle models the psychological cycle of fear and greed that drives penny stock price action.",
+                    desc: "Based on Tim Sykes' 7-Step Framework, Axiarch models the psychological cycle of fear and greed that drives penny stock price action.",
                     icon: TrendingUp,
                     color: "text-emerald",
                   },
@@ -230,13 +230,13 @@ export default function Methodology() {
               <motion.div variants={fadeUp} className="mb-8">
                 <h2 className="font-heading text-2xl font-bold mb-3">Engine 3: Intraday Signal Generator</h2>
                 <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                  Once the market opens, Oracle observes the initial chaotic price action for 2 to 5 minutes.
+                  Once the market opens, Axiarch observes the initial chaotic price action for 2 to 5 minutes.
                   It then locks in its top 20 stocks for the day and calculates specific actionable data points for each.
                 </p>
               </motion.div>
 
               <motion.div variants={fadeUp} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                {oracleOutputs.map((o) => {
+                {axiarchOutputs.map((o) => {
                   const Icon = o.icon;
                   return (
                     <Card key={o.label} className="bg-card border-border/60">
@@ -257,15 +257,15 @@ export default function Methodology() {
                   <CardHeader className="border-b border-border/40">
                     <CardTitle className="text-base font-heading flex items-center gap-2">
                       <Activity className="w-4 h-4 text-indigo" />
-                      Oracle Daily Timeline
+                      Axiarch Daily Timeline
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
                     <div className="space-y-0">
                       {[
-                        { time: "4:00 AM", event: "Pre-market scanning begins", detail: "Oracle scans all available stocks against quantitative criteria" },
+                        { time: "4:00 AM", event: "Pre-market scanning begins", detail: "Axiarch scans all available stocks against quantitative criteria" },
                         { time: "9:29 AM", event: "Hottest potentials identified", detail: "Top candidates locked based on pre-market momentum + sentiment" },
-                        { time: "9:30 AM", event: "Market opens", detail: "Oracle observes initial price action and volatility" },
+                        { time: "9:30 AM", event: "Market opens", detail: "Axiarch observes initial price action and volatility" },
                         { time: "9:32-35 AM", event: "Signals locked", detail: "20 stocks finalized with entry prices, bias, S/R levels" },
                         { time: "10:00 AM", event: "Daily Direction Alerts", detail: "Team curates top 3 picks with deeper analysis" },
                         { time: "All Day", event: "Bias updates", detail: "Green/Red bias can flip based on intraday momentum shifts" },
@@ -301,7 +301,7 @@ export default function Methodology() {
         >
           <h2 className="font-heading text-2xl font-bold tracking-tight mb-3">Technical Indicator Weighting</h2>
           <p className="text-muted-foreground max-w-2xl">
-            Oracle's proprietary formula relies on a specific confluence of momentum and volume indicators
+            Axiarch's proprietary formula relies on a specific confluence of momentum and volume indicators
             to determine its Green/Red bias and Support/Resistance levels.
           </p>
         </motion.div>

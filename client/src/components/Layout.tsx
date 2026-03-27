@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Activity className="w-4.5 h-4.5 text-white" />
             </div>
             <span className="font-heading font-bold text-lg tracking-tight text-foreground">
-              Oracle<span className="text-indigo">Decoded</span>
+              Axi<span className="text-indigo">arch</span>
             </span>
           </Link>
 
@@ -137,7 +137,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border/50 mt-20">
         <div className="container py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            Oracle Decoded is an independent research tool. Not affiliated with StocksToTrade.
+            The Axiarch Trading Algorithm is an independent research tool. Not affiliated with StocksToTrade.
           </p>
           <p className="text-xs text-muted-foreground/60">
             For educational purposes only. Not financial advice.

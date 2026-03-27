@@ -1,6 +1,6 @@
 /*
  * DESIGN: Signal Deck — Live Stock Screener
- * Real-time Oracle-style pre-market screener powered by Yahoo Finance
+ * Real-time Axiarch-style pre-market screener powered by Yahoo Finance
  */
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo, useEffect, useCallback } from "react";
@@ -115,10 +115,10 @@ export default function Screener() {
               <Activity className="w-3 h-3" /> LIVE DATA
             </span>
             <h1 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-              Oracle Stock Screener
+              Axiarch Stock Screener
             </h1>
             <p className="text-muted-foreground max-w-2xl text-lg">
-              Real-time screening powered by Yahoo Finance. Adjust filters to narrow 200+ stocks down to Oracle-quality picks.
+              Real-time screening powered by Yahoo Finance. Adjust filters to narrow 200+ stocks down to Axiarch-quality picks.
             </p>
             {/* Scan stats bar */}
             {data && !isLoading && (
@@ -271,12 +271,12 @@ export default function Screener() {
               </CardContent>
             </Card>
 
-            {/* Oracle Criteria Reference */}
+            {/* Axiarch Criteria Reference */}
             <Card className="bg-card border-border/60">
               <CardContent className="p-5">
                 <h3 className="font-heading font-semibold text-xs mb-3 flex items-center gap-2 text-muted-foreground">
                   <Zap className="w-3.5 h-3.5 text-indigo" />
-                  ORACLE DEFAULTS
+                  AXIARCH DEFAULTS
                 </h3>
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
@@ -642,7 +642,7 @@ export default function Screener() {
                 <AlertCircle className="w-4 h-4 text-amber shrink-0 mt-0.5" />
                 <span>
                   This screener displays real-time market data from Yahoo Finance. Data may be delayed up to 15 minutes during market hours.
-                  Oracle scores and bias signals are for research purposes only — not financial advice.
+                  Axiarch scores and bias signals are for research purposes only — not financial advice.
                 </span>
               </p>
             </div>

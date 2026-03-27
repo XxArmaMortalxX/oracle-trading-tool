@@ -26,7 +26,7 @@ interface Step {
   psychology: string;
   tradingAction: string;
   bias: "bullish" | "bearish" | "neutral";
-  oracleRelevance: string;
+  axiarchRelevance: string;
   chartPoints: number[];
 }
 
@@ -40,7 +40,7 @@ const steps: Step[] = [
     psychology: "Greed is building among insiders. The general public is unaware. Smart money is positioning.",
     tradingAction: "Difficult to identify in real-time. Requires patience and sector awareness. Best for experienced traders with small accounts.",
     bias: "neutral",
-    oracleRelevance: "Oracle tracks 'former runners' — stocks that have completed this cycle before and may be setting up for another run.",
+    axiarchRelevance: "Axiarch tracks 'former runners' — stocks that have completed this cycle before and may be setting up for another run.",
     chartPoints: [10, 12, 11, 13, 12, 14, 15, 14],
   },
   {
@@ -48,11 +48,11 @@ const steps: Step[] = [
     name: "Ramp",
     subtitle: "The Hype Machine Activates",
     description:
-      "The run-up accelerates. Social media buzz increases, volume spikes, and the stock begins breaking out of consolidation. Chat rooms light up. This is where Oracle's sentiment engine kicks in.",
+      "The run-up accelerates. Social media buzz increases, volume spikes, and the stock begins breaking out of consolidation. Chat rooms light up. This is where Axiarch's sentiment engine kicks in.",
     psychology: "FOMO begins. Early buyers feel validated. New buyers rush in. Social media amplifies the excitement.",
-    tradingAction: "Look for consolidation breakouts with increasing volume. Oracle flags these stocks when social media velocity accelerates.",
+    tradingAction: "Look for consolidation breakouts with increasing volume. Axiarch flags these stocks when social media velocity accelerates.",
     bias: "bullish",
-    oracleRelevance: "Oracle's Catalyst & Sentiment Engine detects the acceleration in social media mentions and flags the stock for the daily watchlist.",
+    axiarchRelevance: "Axiarch's Catalyst & Sentiment Engine detects the acceleration in social media mentions and flags the stock for the daily watchlist.",
     chartPoints: [14, 16, 18, 22, 25, 30, 35, 42],
   },
   {
@@ -60,11 +60,11 @@ const steps: Step[] = [
     name: "Supernova",
     subtitle: "The Explosive Spike",
     description:
-      "This is the most explosive phase. The stock goes parabolic — sometimes gaining 100%+ in a single day. Volume is massive. Everyone is talking about it. This is where Oracle generates its LONG signals.",
+      "This is the most explosive phase. The stock goes parabolic — sometimes gaining 100%+ in a single day. Volume is massive. Everyone is talking about it. This is where Axiarch generates its LONG signals.",
     psychology: "Peak greed. Euphoria takes over. Traders believe it will 'never come down.' This is the most dangerous time to buy.",
-    tradingAction: "Oracle provides specific entry signals and profit targets. The Red Candle Theory (RCT) pattern is used to time entries during this phase.",
+    tradingAction: "Axiarch provides specific entry signals and profit targets. The Red Candle Theory (RCT) pattern is used to time entries during this phase.",
     bias: "bullish",
-    oracleRelevance: "Oracle's Signal Generator calculates precise entry prices, stop losses, and 5:1 risk-reward targets during the supernova phase.",
+    axiarchRelevance: "Axiarch's Signal Generator calculates precise entry prices, stop losses, and 5:1 risk-reward targets during the supernova phase.",
     chartPoints: [42, 55, 68, 82, 90, 95, 92, 88],
   },
   {
@@ -72,11 +72,11 @@ const steps: Step[] = [
     name: "Cliff Dive",
     subtitle: "The Inevitable Crash",
     description:
-      "What goes up must come down. The promotion stops, early buyers take profits, and the stock collapses. Drops of 50%+ in a single day are common. This is where Oracle flips to SHORT bias.",
+      "What goes up must come down. The promotion stops, early buyers take profits, and the stock collapses. Drops of 50%+ in a single day are common. This is where Axiarch flips to SHORT bias.",
     psychology: "Panic sets in. Bag holders refuse to sell, hoping for a bounce. Fear dominates. The crowd that was euphoric is now in denial.",
-    tradingAction: "Oracle switches to RED (short) bias. Short sellers enter. This is the most profitable phase for shorts but also the hardest to time.",
+    tradingAction: "Axiarch switches to RED (short) bias. Short sellers enter. This is the most profitable phase for shorts but also the hardest to time.",
     bias: "bearish",
-    oracleRelevance: "Oracle's bias indicator flips from Green to Red. Short signal prices are calculated for traders looking to profit from the decline.",
+    axiarchRelevance: "Axiarch's bias indicator flips from Green to Red. Short signal prices are calculated for traders looking to profit from the decline.",
     chartPoints: [88, 75, 60, 45, 35, 28, 25, 22],
   },
   {
@@ -86,9 +86,9 @@ const steps: Step[] = [
     description:
       "After the crash, bargain hunters step in. The stock bounces off support levels. This is Tim Sykes' favorite pattern for small accounts — buying the panic dip when there's still momentum.",
     psychology: "A mix of hope and fear. Dip buyers see opportunity. Bag holders feel relief. Short sellers cover positions.",
-    tradingAction: "Oracle identifies key support levels where dip buys are likely. Look for volume confirmation on the bounce.",
+    tradingAction: "Axiarch identifies key support levels where dip buys are likely. Look for volume confirmation on the bounce.",
     bias: "bullish",
-    oracleRelevance: "Oracle recalculates support levels and may generate new LONG signals if the bounce shows sufficient volume and momentum.",
+    axiarchRelevance: "Axiarch recalculates support levels and may generate new LONG signals if the bounce shows sufficient volume and momentum.",
     chartPoints: [22, 20, 18, 20, 25, 30, 35, 38],
   },
   {
@@ -98,9 +98,9 @@ const steps: Step[] = [
     description:
       "A smaller, weaker bounce. Less volume, less conviction. Traders who missed the first run try to catch this one, but momentum is fading. The bounce typically fails to reach previous highs.",
     psychology: "Diminishing hope. Each bounce is weaker. Smart money has already exited. Only retail stragglers remain.",
-    tradingAction: "Experienced traders short the bounce. Oracle may show mixed signals — weaker Green bias or neutral.",
+    tradingAction: "Experienced traders short the bounce. Axiarch may show mixed signals — weaker Green bias or neutral.",
     bias: "neutral",
-    oracleRelevance: "Oracle's delta calculations show widening gaps between signal prices and actual S/R levels, indicating weakening momentum.",
+    axiarchRelevance: "Axiarch's delta calculations show widening gaps between signal prices and actual S/R levels, indicating weakening momentum.",
     chartPoints: [38, 35, 32, 34, 36, 33, 30, 28],
   },
   {
@@ -110,9 +110,9 @@ const steps: Step[] = [
     description:
       "The stock slowly fades into irrelevance. Volume dries up. No more social media buzz. The stock returns to its pre-pump levels or lower. The cycle is complete.",
     psychology: "Apathy. Bag holders have given up. The stock is forgotten. Until the next catalyst arrives and the cycle begins again.",
-    tradingAction: "No active trading. Oracle removes the stock from its watchlist. However, it's added to the 'former runners' database for future monitoring.",
+    tradingAction: "No active trading. Axiarch removes the stock from its watchlist. However, it's added to the 'former runners' database for future monitoring.",
     bias: "bearish",
-    oracleRelevance: "Oracle archives the stock as a 'former runner' — if a new catalyst appears months later, it will be flagged again at Step 1.",
+    axiarchRelevance: "Axiarch archives the stock as a 'former runner' — if a new catalyst appears months later, it will be flagged again at Step 1.",
     chartPoints: [28, 25, 22, 20, 18, 16, 14, 12],
   },
 ];
@@ -172,7 +172,7 @@ export default function Framework() {
               The 7-Step Pennystocking Framework
             </h1>
             <p className="text-muted-foreground max-w-2xl text-lg">
-              Tim Sykes' foundational "pattern of patterns" — the psychological lifecycle that Oracle is programmed to identify and trade.
+              Tim Sykes' foundational "pattern of patterns" — the psychological lifecycle that Axiarch is programmed to identify and trade.
             </p>
           </motion.div>
         </div>
@@ -298,15 +298,15 @@ export default function Framework() {
                 </div>
               </div>
 
-              {/* Sidebar — Oracle Relevance */}
+              {/* Sidebar — Axiarch Relevance */}
               <div className="space-y-4">
                 <Card className="bg-card border-border/60 glow-indigo">
                   <CardContent className="p-5">
                     <h3 className="font-heading font-semibold text-sm mb-3 flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-indigo" />
-                      Oracle Relevance
+                      Axiarch Relevance
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{step.oracleRelevance}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{step.axiarchRelevance}</p>
                   </CardContent>
                 </Card>
 

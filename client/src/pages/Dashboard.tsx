@@ -1,6 +1,6 @@
 /**
  * DESIGN: Signal Deck — Live Picks Dashboard
- * Shows latest Oracle scan results, scan history, and notification preferences
+ * Shows latest Axiarch scan results, scan history, and notification preferences
  */
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -71,7 +71,7 @@ export default function Dashboard() {
       toast.success(
         data.picksCount > 0
           ? `Refreshed! ${data.picksCount} live picks from Yahoo Finance.`
-          : "Scan complete — no stocks matched Oracle criteria right now."
+          : "Scan complete — no stocks matched Axiarch criteria right now."
       );
       // Invalidate all scan queries to show fresh data
       utils.scan.latestSession.invalidate();
@@ -137,10 +137,10 @@ export default function Dashboard() {
               )}
             </div>
             <h1 className="font-heading text-3xl font-bold tracking-tight">
-              Oracle <span className="text-gradient">Live Picks</span>
+              Axiarch <span className="text-gradient">Live Picks</span>
             </h1>
             <p className="text-muted-foreground mt-1">
-              Real-time stock screening powered by Oracle-style methodology
+              Real-time stock screening powered by Axiarch-style methodology
             </p>
           </div>
 
@@ -253,7 +253,7 @@ export default function Dashboard() {
               <Activity className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
               <h3 className="font-heading text-lg font-semibold mb-2">No Scan Data Yet</h3>
               <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
-                The Oracle scanner hasn't run yet. Click "Refresh" to fetch real-time market data
+                The Axiarch scanner hasn't run yet. Click "Refresh" to fetch real-time market data
                 from Yahoo Finance, or {user?.role === "admin"
                   ? "click 'Run Scan' to trigger a full scan with notifications."
                   : "wait for the daily 8:00 AM ET pre-market scan."}
@@ -277,7 +277,7 @@ export default function Dashboard() {
         {/* Picks Table */}
         {!isRefreshing && picks.length > 0 && (
           <div className="mb-8">
-            <h2 className="font-heading text-xl font-bold mb-4">Today's Oracle Picks</h2>
+            <h2 className="font-heading text-xl font-bold mb-4">Today's Axiarch Picks</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -577,7 +577,7 @@ export default function Dashboard() {
 
                   <div>
                     <Label className="text-sm font-medium mb-2 block">
-                      Minimum Oracle Score: {notifPrefs.data?.minOracleScore ?? minScore}
+                      Minimum Axiarch Score: {notifPrefs.data?.minOracleScore ?? minScore}
                     </Label>
                     <Slider
                       value={[notifPrefs.data?.minOracleScore ?? minScore]}
@@ -647,7 +647,7 @@ export default function Dashboard() {
             <div>
               <p className="text-sm font-medium text-amber mb-1">Disclaimer</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Oracle Decoded is an independent research tool for educational purposes only.
+                The Axiarch Trading Algorithm is an independent research tool for educational purposes only.
                 Stock picks are generated algorithmically and should not be considered financial advice.
                 Always do your own due diligence before making any trading decisions.
                 Past performance does not guarantee future results. Day trading involves substantial risk.

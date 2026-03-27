@@ -138,3 +138,17 @@
 - [x] Write 25 unit tests for shift detection (severity, direction, detection, routes)
 - [x] All 124 tests passing across 8 test files
 - [x] Verify end-to-end and save checkpoint
+
+## Rebrand to "The Axiarch Trading Algorithm"
+- [x] Update HTML page title in index.html
+- [x] Update navbar logo text (Layout.tsx): Axi + arch
+- [x] Update footer text (Layout.tsx)
+- [x] Update Home.tsx hero, features, signal preview, CTA (8 references)
+- [x] Update Methodology.tsx headings, engine descriptions, timeline (14 references)
+- [x] Update Framework.tsx step data, sidebar label (20 references)
+- [x] Update Calculator.tsx descriptions (3 references)
+- [x] Update Screener.tsx header, defaults, disclaimer (6 references)
+- [x] Update Dashboard.tsx title, picks header, disclaimer (8 references)
+- [x] Update shared/const.ts comment
+- [x] TypeScript compiles cleanly, all 124 tests pass
+- [ ] VITE_APP_TITLE is a built-in secret (cannot be changed via code)

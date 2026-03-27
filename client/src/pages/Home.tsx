@@ -43,8 +43,8 @@ const stats = [
 
 const features = [
   {
-    title: "Oracle Methodology",
-    desc: "Deep dive into the three engines powering Oracle: Pre-Market Screener, Catalyst & Sentiment Engine, and Intraday Signal Generator.",
+    title: "Axiarch Methodology",
+    desc: "Deep dive into the three engines powering Axiarch: Pre-Market Screener, Catalyst & Sentiment Engine, and Intraday Signal Generator.",
     icon: Layers,
     href: "/methodology",
     color: "text-indigo",
@@ -68,7 +68,7 @@ const features = [
   },
   {
     title: "Stock Screener",
-    desc: "Simulate Oracle's pre-market screening criteria. Filter by price, float, volume, and gap percentage to find potential runners.",
+    desc: "Simulate Axiarch's pre-market screening criteria. Filter by price, float, volume, and gap percentage to find potential runners.",
     icon: Search,
     href: "/screener",
     color: "text-amber",
@@ -114,15 +114,15 @@ export default function Home() {
               className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6"
             >
               Decoding the{" "}
-              <span className="text-gradient">Oracle Algorithm</span>
+              <span className="text-gradient">Axiarch Algorithm</span>
             </motion.h1>
 
             <motion.p
               variants={fadeUp}
               className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mb-10"
             >
-              An independent research tool that breaks down how StocksToTrade's
-              Oracle AI picks day trading stocks — and gives you the tools to
+              An independent research tool that breaks down how the Axiarch
+              algorithm picks day trading stocks — and gives you the tools to
               replicate its methodology yourself.
             </motion.p>
 
@@ -191,7 +191,7 @@ export default function Home() {
             Research Tools
           </h2>
           <p className="text-muted-foreground max-w-xl">
-            Everything you need to understand, replicate, and apply Oracle's
+            Everything you need to understand, replicate, and apply Axiarch's
             day trading methodology.
           </p>
         </motion.div>
@@ -257,7 +257,7 @@ export default function Home() {
                 Three Engines. One Algorithm.
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8">
-                Oracle isn't magic — it's a cleverly automated version of
+                Axiarch isn't magic — it's a cleverly automated version of
                 Tim Sykes' 20-year-old penny stock playbook, turbocharged with
                 social media sentiment tracking and strict risk-reward math.
               </p>
@@ -311,7 +311,7 @@ export default function Home() {
               <div className="bg-card border border-border/60 rounded-xl p-6 glow-indigo">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-heading font-semibold text-sm text-foreground">
-                    Oracle Signal Preview
+                    Axiarch Signal Preview
                   </h3>
                   <span className="flex items-center gap-1.5 text-xs font-mono text-emerald">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse" />
@@ -382,7 +382,7 @@ export default function Home() {
             Ready to decode the signals?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Explore each component of Oracle's methodology, run the numbers
+            Explore each component of Axiarch's methodology, run the numbers
             through our calculators, and build your own screening criteria.
           </p>
           <div className="flex flex-wrap justify-center gap-3">

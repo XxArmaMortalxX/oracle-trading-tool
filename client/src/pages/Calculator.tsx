@@ -86,7 +86,7 @@ export default function Calculator() {
               Red Candle Theory Calculator
             </h1>
             <p className="text-muted-foreground max-w-2xl text-lg">
-              Plug in your first 5-minute red candle data and instantly get Oracle-style entry, stop loss, and profit targets.
+              Plug in your first 5-minute red candle data and instantly get Axiarch-style entry, stop loss, and profit targets.
             </p>
           </motion.div>
         </div>
@@ -251,7 +251,7 @@ export default function Calculator() {
                           <td className="p-4 font-mono font-bold text-indigo">3:1</td>
                         </tr>
                         <tr className="border-b border-border/20">
-                          <td className="p-4 font-medium">Target 2 (Oracle)</td>
+                          <td className="p-4 font-medium">Target 2 (Axiarch)</td>
                           <td className="p-4 font-mono text-emerald">${calc.target2}</td>
                           <td className="p-4 font-mono">${(parseFloat(calc.target2) - parseFloat(calc.entry)).toFixed(2)}</td>
                           <td className="p-4 font-mono text-emerald">${calc.potentialGain5}</td>
@@ -384,7 +384,7 @@ export default function Calculator() {
                   </h3>
                   <p className="text-sm text-muted-foreground/60 max-w-sm mx-auto">
                     Input the open and close prices of the first 5-minute red candle to calculate
-                    Oracle-style entry, stop loss, and profit targets.
+                    Axiarch-style entry, stop loss, and profit targets.
                   </p>
                 </CardContent>
               </Card>
