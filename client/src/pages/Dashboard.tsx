@@ -435,7 +435,7 @@ export default function Dashboard() {
                           </span>
                         )}
                       </td>
-                      {/* Reddit Mention Velocity */}
+                      {/* Reddit Mention Velocity + Crowd Sentiment */}
                       <td className="py-3 px-3 text-center">
                         {(pick as any).redditMentions != null ? (
                           <div className="flex flex-col items-center gap-0.5">
@@ -459,6 +459,19 @@ export default function Dashboard() {
                             }`}>
                               {(pick as any).redditVelocityPct > 0 ? "+" : ""}{((pick as any).redditVelocityPct ?? 0).toFixed(0)}%
                             </span>
+                            {/* Crowd Sentiment Bias */}
+                            {(pick as any).redditSentimentCrowdBias && (
+                              <span className={`text-[9px] font-mono font-medium ${
+                                (pick as any).redditSentimentCrowdBias === "LONG_BIAS" ? "text-emerald" :
+                                (pick as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "text-rose" :
+                                "text-muted-foreground"
+                              }`}>
+                                {(pick as any).redditSentimentCrowdBias === "LONG_BIAS" ? "🟢" :
+                                 (pick as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "🔴" : "⚪"}
+                                {" "}
+                                {(pick as any).redditSentimentBullishPct ?? 0}% Bull
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <span className="text-[10px] text-muted-foreground/30">—</span>

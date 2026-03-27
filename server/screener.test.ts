@@ -8,6 +8,23 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
+// Mock redditSentiment to avoid live Reddit API calls in tests
+vi.mock("./redditSentiment", () => ({
+  fetchRedditSentimentCached: vi.fn(async () => ({
+    fetchedAt: new Date(),
+    totalPosts: 0,
+    totalTickers: 0,
+    tickers: new Map(),
+  })),
+  refreshRedditSentiment: vi.fn(async () => ({
+    fetchedAt: new Date(),
+    totalPosts: 0,
+    totalTickers: 0,
+    tickers: new Map(),
+  })),
+  getSentimentForTickers: vi.fn(async () => new Map()),
+}));
+
 // Mock the oracleScanner module to replace fetchStockData with a fast mock
 vi.mock("./oracleScanner", async (importOriginal) => {
   const original = await importOriginal<typeof import("./oracleScanner")>();

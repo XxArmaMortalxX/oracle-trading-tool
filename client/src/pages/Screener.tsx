@@ -393,7 +393,7 @@ export default function Screener() {
             {!isLoading && !error && sorted.length > 0 && (
               <div className="space-y-2">
                 {/* Table Header */}
-                <div className="hidden sm:grid grid-cols-14 gap-2 px-4 py-2 text-xs font-heading font-semibold text-muted-foreground" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+                <div className="hidden sm:grid grid-cols-15 gap-2 px-4 py-2 text-xs font-heading font-semibold text-muted-foreground" style={{ gridTemplateColumns: 'repeat(15, minmax(0, 1fr))' }}>
                   <div className="col-span-2">Ticker</div>
                   <div className="col-span-1">Price</div>
                   <div className="col-span-1">Gap %</div>
@@ -404,7 +404,8 @@ export default function Screener() {
                   <div className="col-span-1">Score</div>
                   <div className="col-span-1">Sentiment</div>
                   <div className="col-span-1">Trend</div>
-                  <div className="col-span-2">Signal</div>
+                  <div className="col-span-1">Crowd</div>
+                  <div className="col-span-1">Signal</div>
                 </div>
 
                 <AnimatePresence mode="popLayout">
@@ -423,7 +424,7 @@ export default function Screener() {
                         }`}
                       >
                         <CardContent className="p-4">
-                          <div className="grid items-center gap-2" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+                          <div className="grid items-center gap-2" style={{ gridTemplateColumns: 'repeat(15, minmax(0, 1fr))' }}>
                             {/* Ticker + name */}
                             <div className="col-span-12 sm:col-span-2 flex items-center gap-2">
                               <span className="font-mono font-bold text-foreground">{stock.ticker}</span>
@@ -540,8 +541,31 @@ export default function Screener() {
                                 </span>
                               )}
                             </div>
+                            {/* Reddit Crowd Sentiment */}
+                            <div className="hidden sm:block col-span-1">
+                              {(stock as any).redditSentimentCrowdBias ? (
+                                <div className="flex flex-col items-start gap-0.5">
+                                  <span className={`inline-flex items-center gap-1 text-[10px] font-mono font-medium ${
+                                    (stock as any).redditSentimentCrowdBias === "LONG_BIAS" ? "text-emerald" :
+                                    (stock as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "text-rose" :
+                                    "text-muted-foreground"
+                                  }`}>
+                                    {(stock as any).redditSentimentCrowdBias === "LONG_BIAS" ? "\ud83d\udfe2" :
+                                     (stock as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "\ud83d\udd34" : "\u26aa"}
+                                    {" "}
+                                    {(stock as any).redditSentimentCrowdBias === "LONG_BIAS" ? "Long" :
+                                     (stock as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "Short" : "Mixed"}
+                                  </span>
+                                  <span className="text-[9px] font-mono text-muted-foreground/60">
+                                    {(stock as any).redditSentimentBullishPct ?? 0}%B / {(stock as any).redditSentimentBearishPct ?? 0}%S
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-muted-foreground/30">&mdash;</span>
+                              )}
+                            </div>
                             {/* Signal */}
-                            <div className="hidden sm:block col-span-2">
+                            <div className="hidden sm:block col-span-1">
                               <span className={`inline-flex items-center gap-1 text-xs font-mono px-2 py-1 rounded ${
                                 stock.bias === "LONG"
                                   ? "bg-emerald/10 text-emerald"
@@ -574,6 +598,15 @@ export default function Screener() {
                                 stock.sentimentLabel.includes("Bearish") ? "text-rose" : "text-muted-foreground"
                               }`}>
                                 {stock.sentimentLabel}
+                              </span>
+                            )}
+                            {(stock as any).redditSentimentCrowdBias && (
+                              <span className={`font-mono ${
+                                (stock as any).redditSentimentCrowdBias === "LONG_BIAS" ? "text-emerald" :
+                                (stock as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "text-rose" : "text-muted-foreground"
+                              }`}>
+                                {(stock as any).redditSentimentCrowdBias === "LONG_BIAS" ? "\ud83d\udfe2 Long" :
+                                 (stock as any).redditSentimentCrowdBias === "SHORT_BIAS" ? "\ud83d\udd34 Short" : "\u26aa Mixed"}
                               </span>
                             )}
                           </div>

@@ -109,3 +109,17 @@
 - [x] Write 18 Reddit tracker tests (velocity calc, signal classification, data transformation, edge cases)
 - [x] All 76 tests passing across 6 test files
 - [x] Verified: 500 tickers tracked, RCKT EXPLODING at 2150%, SNAP EXPLODING at 900%
+
+## Reddit Sentiment Classification
+- [x] Build keyword-based sentiment classifier (bullish/bearish/neutral) with defined signal words
+- [x] Integrate classifier into Reddit tracker to analyze post titles for each ticker mention
+- [x] Compute sentiment split per ticker (% bullish / % bearish / % neutral)
+- [x] Add bullishPct, bearishPct, neutralPct, dominantBias fields to Reddit mention data
+- [x] Computed in real-time from Reddit posts (no DB schema change needed — cached 10 min)
+- [x] Update tRPC routes to return sentiment split with Reddit data
+- [x] Update Social Radar UI with sentiment split bars and bias badges (🟢 Long / 🔴 Short / ⚪ Mixed)
+- [x] Update Dashboard picks table REDDIT column with bias indicator
+- [x] Update Screener results with Reddit sentiment data
+- [x] Write 23 tests for sentiment classifier (keyword matching, edge cases, split computation)
+- [x] All 99 tests passing across 7 test files
+- [x] Verify end-to-end and save checkpoint
