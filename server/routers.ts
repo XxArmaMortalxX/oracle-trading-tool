@@ -21,6 +21,14 @@ import {
   type StockChartData,
 } from "./oracleScanner";
 import { computeSentiment, computeSentimentTrend, type SentimentResult, type SentimentTrendResult } from "./sentimentEngine";
+import {
+  fetchRedditMentionsCached,
+  runRedditScan,
+  getLatestMentionsForTickers,
+  getTopTrendingTickers,
+  getTickerVelocityHistory,
+  type RedditMentionData,
+} from "./redditTracker";
 
 // ── Server-side cache for screener data ──
 // Caches the raw fetched stock data for 5 minutes to reduce API calls.
@@ -116,7 +124,7 @@ export const appRouter = router({
         return getPicksBySessionId(input.sessionId);
       }),
 
-    /** Get the latest picks (most recent completed scan) with sentiment trends */
+    /** Get the latest picks (most recent completed scan) with sentiment trends + Reddit data */
     latestPicks: publicProcedure.query(async () => {
       const picks = await getLatestPicks();
       if (picks.length === 0) return [];
@@ -126,6 +134,12 @@ export const appRouter = router({
       const tickers = picks.map(p => p.ticker);
       const previousSentiments = await getPreviousSentimentByTickers(tickers, sessionId);
 
+      // Get Reddit mention data for these tickers
+      let redditMap = new Map<string, RedditMentionData>();
+      try {
+        redditMap = await getLatestMentionsForTickers(tickers);
+      } catch { /* DB may not be available */ }
+
       return picks.map(p => {
         const prev = previousSentiments.get(p.ticker);
         const trend = computeSentimentTrend(
@@ -134,6 +148,7 @@ export const appRouter = router({
           prev?.score ?? null,
           prev?.label ?? null,
         );
+        const reddit = redditMap.get(p.ticker);
         return {
           ...p,
           sentimentTrend: trend.trend,
@@ -141,6 +156,12 @@ export const appRouter = router({
           sentimentTransition: trend.transition,
           previousSentimentLabel: trend.previousLabel,
           previousSentimentScore: trend.previousScore,
+          redditMentions: reddit?.mentions ?? null,
+          redditMentions24hAgo: reddit?.mentions24hAgo ?? null,
+          redditVelocityPct: reddit?.velocityPct ?? null,
+          redditVelocitySignal: reddit?.velocitySignal ?? null,
+          redditRank: reddit?.rank ?? null,
+          redditUpvotes: reddit?.upvotes ?? null,
         };
       });
     }),
@@ -281,6 +302,12 @@ export const appRouter = router({
           previousSentiments = await getPreviousSentimentByTickers(tickers);
         } catch { /* DB may not be available in tests */ }
 
+        // Get Reddit mention data for screener results
+        let redditMap = new Map<string, RedditMentionData>();
+        try {
+          redditMap = await getLatestMentionsForTickers(tickers);
+        } catch { /* DB may not be available */ }
+
         const enrichedResults = results.map(r => {
           const prev = previousSentiments.get(r.ticker);
           const trend = computeSentimentTrend(
@@ -289,12 +316,17 @@ export const appRouter = router({
             prev?.score ?? null,
             prev?.label ?? null,
           );
+          const reddit = redditMap.get(r.ticker);
           return {
             ...r,
             sentimentTrend: trend.trend,
             sentimentDelta: trend.delta,
             sentimentTransition: trend.transition,
             previousSentimentLabel: trend.previousLabel,
+            redditMentions: reddit?.mentions ?? null,
+            redditVelocityPct: reddit?.velocityPct ?? null,
+            redditVelocitySignal: reddit?.velocitySignal ?? null,
+            redditRank: reddit?.rank ?? null,
           };
         });
 
@@ -310,6 +342,64 @@ export const appRouter = router({
           apiErrors: cache.errorCount,
         };
       }),
+  }),
+
+  // ── Reddit Mention Velocity ──
+  reddit: router({
+    /** Get current Reddit mention velocity data (cached, fast) */
+    trending: publicProcedure.query(async () => {
+      const snapshot = await fetchRedditMentionsCached();
+      // Return top 30 by velocity
+      const sorted = [...snapshot.tickers]
+        .filter(t => t.mentions >= 5)
+        .sort((a, b) => b.velocityPct - a.velocityPct)
+        .slice(0, 30);
+      return {
+        tickers: sorted,
+        totalTracked: snapshot.totalTickers,
+        fetchedAt: snapshot.fetchedAt.toISOString(),
+        cached: (Date.now() - snapshot.fetchedAt.getTime()) > 1000,
+      };
+    }),
+
+    /** Get Reddit mention data for specific tickers (from DB) */
+    forTickers: publicProcedure
+      .input(z.object({ tickers: z.array(z.string()).max(100) }))
+      .query(async ({ input }) => {
+        const mentionsMap = await getLatestMentionsForTickers(input.tickers);
+        const result: Record<string, RedditMentionData> = {};
+        for (const [ticker, data] of Array.from(mentionsMap.entries())) {
+          result[ticker] = data;
+        }
+        return result;
+      }),
+
+    /** Get velocity history for a specific ticker */
+    tickerHistory: publicProcedure
+      .input(z.object({ ticker: z.string() }))
+      .query(async ({ input }) => {
+        return getTickerVelocityHistory(input.ticker);
+      }),
+
+    /** Trigger a full Reddit scan — fetches from ApeWisdom and stores in DB */
+    refresh: publicProcedure.mutation(async () => {
+      console.log(`[Reddit] Manual refresh triggered...`);
+      const snapshot = await runRedditScan();
+      return {
+        totalTickers: snapshot.totalTickers,
+        snapshotId: snapshot.snapshotId,
+        fetchedAt: snapshot.fetchedAt.toISOString(),
+        topMovers: snapshot.tickers
+          .filter(t => t.mentions >= 5)
+          .sort((a, b) => b.velocityPct - a.velocityPct)
+          .slice(0, 10),
+      };
+    }),
+
+    /** Get top trending tickers from DB (stored snapshots) */
+    topTrending: publicProcedure.query(async () => {
+      return getTopTrendingTickers(20);
+    }),
   }),
 
   // ── Notification Preferences ──

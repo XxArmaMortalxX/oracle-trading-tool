@@ -94,3 +94,18 @@
 - [x] All 58 tests passing across 5 test files
 - [x] Verified end-to-end: live scan stores history, trends computed correctly
 
+
+## Reddit Mention Velocity Tracker
+- [x] Research Reddit API/data access methods (ApeWisdom API — free, no auth, tracks 500+ tickers)
+- [x] Build redditTracker.ts module using ApeWisdom API (fetchRedditMentionsCached, runRedditScan)
+- [x] Implement velocity computation (mentions vs 24h ago, acceleration %, signal classification)
+- [x] Signal classification: EXPLODING (≥200%), SURGING (≥100%), RISING (≥30%), STABLE, FADING, COLD
+- [x] Create reddit_mentions DB table with ticker index (migration 0004 applied)
+- [x] Add tRPC routes: reddit.trending, reddit.forTickers, reddit.tickerHistory, reddit.refresh, reddit.topTrending
+- [x] Build SocialRadar component on Dashboard (top movers, velocity badges, refresh button)
+- [x] Integrate Reddit data into Dashboard picks table (REDDIT column with mentions + velocity %)
+- [x] Integrate Reddit data into Screener results (mentions, velocity, signal per stock)
+- [x] Server-side caching (10-min TTL) to reduce ApeWisdom API calls
+- [x] Write 18 Reddit tracker tests (velocity calc, signal classification, data transformation, edge cases)
+- [x] All 76 tests passing across 6 test files
+- [x] Verified: 500 tickers tracked, RCKT EXPLODING at 2150%, SNAP EXPLODING at 900%

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `reddit_mentions` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`ticker` varchar(10) NOT NULL,\n\t`mentions` int NOT NULL DEFAULT 0,\n\t`mentions24hAgo` int DEFAULT 0,\n\t`upvotes` int DEFAULT 0,\n\t`rank` int,\n\t`rank24hAgo` int,\n\t`velocityPct` float DEFAULT 0,\n\t`velocityAbs` int DEFAULT 0,\n\t`snapshotId` varchar(36),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `reddit_mentions_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Qj6fKXQHVGPC1t4.root --database m2P5JbZGgAh2LKnMXcJ4ZE --execute CREATE TABLE `reddit_mentions` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`ticker` varchar(10) NOT NULL,\n\t`mentions` int NOT NULL DEFAULT 0,\n\t`mentions24hAgo` int DEFAULT 0,\n\t`upvotes` int DEFAULT 0,\n\t`rank` int,\n\t`rank24hAgo` int,\n\t`velocityPct` float DEFAULT 0,\n\t`velocityAbs` int DEFAULT 0,\n\t`snapshotId` varchar(36),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `reddit_mentions_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 461
+}

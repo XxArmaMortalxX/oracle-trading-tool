@@ -1,0 +1,9 @@
+{
+  "query": "CREATE INDEX idx_reddit_mentions_ticker_created ON reddit_mentions (ticker, createdAt);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Qj6fKXQHVGPC1t4.root --database m2P5JbZGgAh2LKnMXcJ4ZE --execute CREATE INDEX idx_reddit_mentions_ticker_created ON reddit_mentions (ticker, createdAt);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 893
+}

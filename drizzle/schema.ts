@@ -100,3 +100,27 @@ export const sentimentHistory = mysqlTable("sentiment_history", {
 
 export type SentimentHistoryRow = typeof sentimentHistory.$inferSelect;
 export type InsertSentimentHistory = typeof sentimentHistory.$inferInsert;
+
+// ── Reddit Mention Velocity ──
+// Stores periodic snapshots of Reddit mention data from ApeWisdom.
+// Used to compute mention velocity (acceleration of mentions over time).
+
+export const redditMentions = mysqlTable("reddit_mentions", {
+  id: int("id").autoincrement().primaryKey(),
+  ticker: varchar("ticker", { length: 10 }).notNull(),
+  mentions: int("mentions").default(0).notNull(),
+  mentions24hAgo: int("mentions24hAgo").default(0),
+  upvotes: int("upvotes").default(0),
+  rank: int("rank"),
+  rank24hAgo: int("rank24hAgo"),
+  /** Computed: (mentions - mentions24hAgo) / mentions24hAgo * 100 */
+  velocityPct: float("velocityPct").default(0),
+  /** Computed: mentions - mentions24hAgo */
+  velocityAbs: int("velocityAbs").default(0),
+  /** Which snapshot batch this belongs to */
+  snapshotId: varchar("snapshotId", { length: 36 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RedditMention = typeof redditMentions.$inferSelect;
+export type InsertRedditMention = typeof redditMentions.$inferInsert;

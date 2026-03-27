@@ -29,6 +29,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import SocialRadar from "@/components/SocialRadar";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -292,6 +293,7 @@ export default function Dashboard() {
                     <th className="text-right py-3 px-3 text-xs font-mono text-muted-foreground font-medium">VOLUME</th>
                     <th className="text-center py-3 px-3 text-xs font-mono text-muted-foreground font-medium">SENTIMENT</th>
                     <th className="text-center py-3 px-3 text-xs font-mono text-muted-foreground font-medium">TREND</th>
+                    <th className="text-center py-3 px-3 text-xs font-mono text-muted-foreground font-medium">REDDIT</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -433,6 +435,35 @@ export default function Dashboard() {
                           </span>
                         )}
                       </td>
+                      {/* Reddit Mention Velocity */}
+                      <td className="py-3 px-3 text-center">
+                        {(pick as any).redditMentions != null ? (
+                          <div className="flex flex-col items-center gap-0.5">
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full border ${
+                                (pick as any).redditVelocitySignal === "EXPLODING"
+                                  ? "bg-rose/15 text-rose border-rose/20"
+                                  : (pick as any).redditVelocitySignal === "SURGING"
+                                  ? "bg-amber/15 text-amber border-amber/20"
+                                  : (pick as any).redditVelocitySignal === "RISING"
+                                  ? "bg-emerald/15 text-emerald border-emerald/20"
+                                  : "bg-secondary/40 text-muted-foreground border-border/20"
+                              }`}
+                            >
+                              {(pick as any).redditMentions} mentions
+                            </span>
+                            <span className={`text-[9px] font-mono ${
+                              (pick as any).redditVelocityPct > 50 ? "text-rose" :
+                              (pick as any).redditVelocityPct > 0 ? "text-emerald" :
+                              "text-muted-foreground/50"
+                            }`}>
+                              {(pick as any).redditVelocityPct > 0 ? "+" : ""}{((pick as any).redditVelocityPct ?? 0).toFixed(0)}%
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground/30">—</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -440,6 +471,9 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Social Radar — Reddit Mention Velocity */}
+        <SocialRadar />
 
         {/* Bottom Row: Scan History + Notification Settings */}
         <div className="grid lg:grid-cols-2 gap-6">
