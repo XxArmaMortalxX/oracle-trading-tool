@@ -123,3 +123,18 @@
 - [x] Write 23 tests for sentiment classifier (keyword matching, edge cases, split computation)
 - [x] All 99 tests passing across 7 test files
 - [x] Verify end-to-end and save checkpoint
+
+## Sentiment Shift Alerts (Bearish → Bullish)
+- [x] Create reddit_sentiment_snapshots DB table (migration 0005 applied)
+- [x] Create sentiment_shift_alerts DB table (migration 0005 applied)
+- [x] Build shift detection engine (sentimentShiftDetector.ts) with severity classification
+- [x] Define shift severity levels: DRAMATIC (≥40pt), MODERATE (≥25pt), MINOR (≥15pt)
+- [x] Detect 6 shift directions: BEARISH_TO_BULLISH, MIXED_TO_BULLISH, BULLISH_TO_BEARISH, etc.
+- [x] Integrate shift detection into Reddit refresh flow (auto-detect on each scan)
+- [x] Send owner notification via notifyOwner for bearish→bullish shifts
+- [x] Add tRPC routes: alerts.recent, alerts.history, alerts.dismiss, alerts.count
+- [x] Build SentimentShiftAlerts panel on Dashboard with alert cards, severity badges, dismiss
+- [x] Show shift detection results in Social Radar refresh toast
+- [x] Write 25 unit tests for shift detection (severity, direction, detection, routes)
+- [x] All 124 tests passing across 8 test files
+- [x] Verify end-to-end and save checkpoint

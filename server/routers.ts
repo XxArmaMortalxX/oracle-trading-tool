@@ -35,6 +35,14 @@ import {
   getSentimentForTickers,
   type TickerSentimentSplit,
 } from "./redditSentiment";
+import {
+  runShiftDetection,
+  getRecentAlerts,
+  getAlertHistory,
+  dismissAlert,
+  getActiveAlertCount,
+  type DetectedShift,
+} from "./sentimentShiftDetector";
 
 // ── Server-side cache for screener data ──
 // Caches the raw fetched stock data for 5 minutes to reduce API calls.
@@ -444,14 +452,23 @@ export const appRouter = router({
       }),
 
     /** Trigger a full Reddit scan — fetches from ApeWisdom and stores in DB.
-     *  Also refreshes Reddit sentiment classification. */
+     *  Also refreshes Reddit sentiment classification and runs shift detection. */
     refresh: publicProcedure.mutation(async () => {
       console.log(`[Reddit] Manual refresh triggered...`);
       // Refresh both velocity data and sentiment classification
-      const [snapshot] = await Promise.all([
+      const [snapshot, sentimentSnapshot] = await Promise.all([
         runRedditScan(),
         refreshRedditSentiment(),
       ]);
+
+      // Run shift detection on the fresh sentiment data
+      let shiftResult: { shifts: DetectedShift[]; notified: boolean } = { shifts: [], notified: false };
+      try {
+        shiftResult = await runShiftDetection(sentimentSnapshot.tickers);
+      } catch (err) {
+        console.warn("[Reddit] Shift detection failed:", err);
+      }
+
       return {
         totalTickers: snapshot.totalTickers,
         snapshotId: snapshot.snapshotId,
@@ -460,6 +477,16 @@ export const appRouter = router({
           .filter(t => t.mentions >= 5)
           .sort((a, b) => b.velocityPct - a.velocityPct)
           .slice(0, 10),
+        shiftsDetected: shiftResult.shifts.length,
+        shiftNotified: shiftResult.notified,
+        shifts: shiftResult.shifts.map(s => ({
+          ticker: s.ticker,
+          direction: s.direction,
+          severity: s.severity,
+          shiftMagnitude: s.shiftMagnitude,
+          previousBullishPct: s.previousBullishPct,
+          newBullishPct: s.newBullishPct,
+        })),
       };
     }),
 
@@ -484,6 +511,41 @@ export const appRouter = router({
         totalTickers: snapshot.totalTickers,
         fetchedAt: snapshot.fetchedAt.toISOString(),
       };
+    }),
+  }),
+
+  // ── Sentiment Shift Alerts ──
+  alerts: router({
+    /** Get recent undismissed alerts */
+    recent: publicProcedure.query(async () => {
+      const alerts = await getRecentAlerts(20);
+      return alerts;
+    }),
+
+    /** Get alert history (including dismissed) */
+    history: publicProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(100).optional().default(50),
+        offset: z.number().min(0).optional().default(0),
+      }).optional())
+      .query(async ({ input }) => {
+        const limit = input?.limit ?? 50;
+        const offset = input?.offset ?? 0;
+        return getAlertHistory(limit, offset);
+      }),
+
+    /** Dismiss an alert */
+    dismiss: publicProcedure
+      .input(z.object({ alertId: z.number() }))
+      .mutation(async ({ input }) => {
+        await dismissAlert(input.alertId);
+        return { success: true };
+      }),
+
+    /** Get count of active (undismissed) alerts */
+    count: publicProcedure.query(async () => {
+      const count = await getActiveAlertCount();
+      return { count };
     }),
   }),
 

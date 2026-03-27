@@ -124,3 +124,59 @@ export const redditMentions = mysqlTable("reddit_mentions", {
 
 export type RedditMention = typeof redditMentions.$inferSelect;
 export type InsertRedditMention = typeof redditMentions.$inferInsert;
+
+// ── Reddit Sentiment Snapshots ──
+// Stores periodic Reddit crowd sentiment per ticker for shift detection.
+// Each refresh writes one row per ticker so we can compare current vs previous.
+
+export const redditSentimentSnapshots = mysqlTable("reddit_sentiment_snapshots", {
+  id: int("id").autoincrement().primaryKey(),
+  ticker: varchar("ticker", { length: 10 }).notNull(),
+  bullishPct: int("bullishPct").default(0).notNull(),
+  bearishPct: int("bearishPct").default(0).notNull(),
+  neutralPct: int("neutralPct").default(0).notNull(),
+  totalMentions: int("totalMentions").default(0).notNull(),
+  crowdBias: varchar("crowdBias", { length: 20 }).notNull(), // LONG_BIAS | SHORT_BIAS | MIXED
+  /** Batch identifier for this snapshot */
+  snapshotId: varchar("snapshotId", { length: 36 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RedditSentimentSnapshot = typeof redditSentimentSnapshots.$inferSelect;
+export type InsertRedditSentimentSnapshot = typeof redditSentimentSnapshots.$inferInsert;
+
+// ── Sentiment Shift Alerts ──
+// Stores detected sentiment shift events (e.g., bearish → bullish).
+
+export const sentimentShiftAlerts = mysqlTable("sentiment_shift_alerts", {
+  id: int("id").autoincrement().primaryKey(),
+  ticker: varchar("ticker", { length: 10 }).notNull(),
+  /** Previous crowd bias */
+  previousBias: varchar("previousBias", { length: 20 }).notNull(),
+  /** New crowd bias */
+  newBias: varchar("newBias", { length: 20 }).notNull(),
+  /** Previous bullish percentage */
+  previousBullishPct: int("previousBullishPct").default(0).notNull(),
+  /** New bullish percentage */
+  newBullishPct: int("newBullishPct").default(0).notNull(),
+  /** Previous bearish percentage */
+  previousBearishPct: int("previousBearishPct").default(0).notNull(),
+  /** New bearish percentage */
+  newBearishPct: int("newBearishPct").default(0).notNull(),
+  /** Magnitude of the shift in percentage points */
+  shiftMagnitude: int("shiftMagnitude").default(0).notNull(),
+  /** Severity: DRAMATIC (≥40pt swing), MODERATE (≥25pt), MINOR (≥15pt) */
+  severity: varchar("severity", { length: 20 }).notNull(),
+  /** Direction of the shift */
+  direction: varchar("direction", { length: 30 }).notNull(), // BEARISH_TO_BULLISH | BULLISH_TO_BEARISH | MIXED_TO_BULLISH | etc.
+  /** Total Reddit mentions at time of detection */
+  totalMentions: int("totalMentions").default(0),
+  /** Whether the owner was notified */
+  notified: int("notified").default(0),
+  /** Whether the alert has been dismissed by the user */
+  dismissed: int("dismissed").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SentimentShiftAlert = typeof sentimentShiftAlerts.$inferSelect;
+export type InsertSentimentShiftAlert = typeof sentimentShiftAlerts.$inferInsert;

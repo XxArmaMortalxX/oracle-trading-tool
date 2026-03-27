@@ -164,9 +164,20 @@ export default function SocialRadar() {
 
   // Refresh mutation
   const refreshReddit = trpc.reddit.refresh.useMutation({
-    onSuccess: (data) => {
-      toast.success(`Reddit scan complete! ${data.totalTickers} tickers tracked.`);
+    onSuccess: (data: any) => {
+      const shiftCount = data.shiftsDetected ?? 0;
+      if (shiftCount > 0) {
+        toast.success(
+          `Reddit scan complete! ${data.totalTickers} tickers tracked. ${shiftCount} sentiment shift${shiftCount > 1 ? "s" : ""} detected!`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.success(`Reddit scan complete! ${data.totalTickers} tickers tracked.`);
+      }
       utils.reddit.trending.invalidate();
+      // Also invalidate alerts so the shift panel updates
+      utils.alerts.recent.invalidate();
+      utils.alerts.count.invalidate();
     },
     onError: (err) => {
       toast.error(`Reddit refresh failed: ${err.message}`);

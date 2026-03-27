@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import SocialRadar from "@/components/SocialRadar";
+import SentimentShiftAlerts from "@/components/SentimentShiftAlerts";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -487,6 +488,9 @@ export default function Dashboard() {
 
         {/* Social Radar — Reddit Mention Velocity */}
         <SocialRadar />
+
+        {/* Sentiment Shift Alerts */}
+        <SentimentShiftAlerts />
 
         {/* Bottom Row: Scan History + Notification Settings */}
         <div className="grid lg:grid-cols-2 gap-6">
