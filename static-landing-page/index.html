@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+
+  <!-- Primary Meta Tags -->
+  <title>Axiarch Trading Algorithm | AI Stock Screener</title>
+  <meta name="title" content="Axiarch Trading Algorithm | AI Stock Screener" />
+  <meta name="description" content="AI-powered stock screener with real-time sentiment tracking across Reddit, X, and TikTok. 20 scored picks daily before market open." />
+  <meta name="keywords" content="algorithmic trading, stock screener, sentiment analysis, day trading tools, stock picks, social media trading" />
+  <meta name="author" content="Axiarch Trading" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://axiarchtrading.live" />
+
+  <!-- Open Graph / Facebook / LinkedIn -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://axiarchtrading.live" />
+  <meta property="og:title" content="The Axiarch Trading Algorithm | Detect Sentiment Shifts Before the Move" />
+  <meta property="og:description" content="AI-powered stock screening with real-time social sentiment from Reddit, X, and TikTok. 20 algorithmically scored picks delivered daily before market open. $29.99/mo." />
+  <meta property="og:site_name" content="Axiarch Trading" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://axiarchtrading.live" />
+  <meta name="twitter:title" content="The Axiarch Trading Algorithm | AI-Powered Stock Screening" />
+  <meta name="twitter:description" content="Scans thousands of stocks, tracks sentiment across Reddit, X & TikTok, and delivers 20 scored picks every morning. Built for traders who want data, not opinions." />
+
+  <!-- Additional SEO -->
+  <meta name="theme-color" content="#dc2626" />
+  <meta name="application-name" content="Axiarch Trading" />
+  <meta name="apple-mobile-web-app-title" content="Axiarch" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "The Axiarch Trading Algorithm",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "description": "AI-powered algorithmic stock screening platform that combines technical analysis with real-time social sentiment tracking across Reddit, X, and TikTok to deliver daily scored stock picks.",
+    "url": "https://axiarchtrading.live",
+    "offers": {
+      "@type": "Offer",
+      "price": "29.99",
+      "priceCurrency": "USD",
+      "priceValidUntil": "2027-12-31",
+      "availability": "https://schema.org/InStock"
+    },
+    "featureList": [
+      "Algorithmic stock screening with 7-step scoring framework",
+      "Real-time social sentiment analysis across Reddit, X, and TikTok",
+      "NLP-powered sentiment classification with negation and sarcasm detection",
+      "Daily top 20 stock picks delivered before market open",
+      "Cross-platform Social Radar with velocity tracking",
+      "Sentiment shift alerts for bearish-to-bullish momentum changes"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Axiarch Trading",
+    "url": "https://axiarchtrading.live",
+    "description": "Algorithmic trading intelligence platform for day traders and swing traders."
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Axiarch Trading Algorithm?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Axiarch is an AI-powered algorithmic stock screening platform that scans thousands of stocks daily, tracks real-time social sentiment across Reddit, X, and TikTok, and delivers 20 algorithmically scored stock picks every morning before market open."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the sentiment analysis work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Axiarch uses a multi-tier NLP sentiment classifier. The primary tier uses LLM-based analysis for context-aware classification. The fallback tier uses enhanced keyword matching with negation detection, sarcasm heuristics, and temporal modifiers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does Axiarch cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Axiarch is available for $29.99 per month with no long-term commitment. You can cancel anytime."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Axiarch a signal service or financial advisor?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Axiarch is a data tool, not a signal service or financial advisor. It provides algorithmic analysis and social sentiment data to help traders make more informed decisions. All trading involves risk."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span class="nav-logo-text"><span class="nav-logo-highlight">Axi</span>arch</span>
+      </a>
+      <div class="nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-actions">
+        <a href="https://axiarchtrading.live" class="btn btn-primary btn-sm">Launch App &rarr;</a>
+      </div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
+      <a href="#demo">Demo</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://axiarchtrading.live" class="btn btn-primary" style="margin-top:0.5rem;text-align:center;">Launch App &rarr;</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="container hero-content">
+      <span class="badge badge-red">ALGORITHMIC TRADING INTELLIGENCE</span>
+      <h1 class="hero-headline">
+        Detect Sentiment Shifts in Penny Stocks
+        <span class="text-gradient">Before the Move Happens.</span>
+      </h1>
+      <p class="hero-sub">
+        Axiarch scans Reddit, X, and TikTok in real time, scores stocks with a 7-step algorithm,
+        and delivers 20 actionable picks before market open &mdash; so you trade with data, not emotions.
+      </p>
+      <div class="hero-ctas">
+        <a href="https://axiarchtrading.live" class="btn btn-primary btn-lg">Start Your Subscription &rarr;</a>
+        <a href="#waitlist" class="btn btn-outline btn-lg">Join the Waitlist</a>
+      </div>
+      <div class="hero-trust">
+        <span>&#10003; Cancel anytime</span>
+        <span>&#10003; 60-second setup</span>
+        <span>&#10003; Secure Stripe checkout</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stats Bar ── -->
+  <section class="stats-bar">
+    <div class="container stats-inner">
+      <div class="stat">
+        <span class="stat-num" data-target="149">0</span><span class="stat-suffix">+</span>
+        <span class="stat-label">Stocks Scanned Daily</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" data-target="20">0</span>
+        <span class="stat-label">Daily Scored Picks</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" data-target="3">0</span>
+        <span class="stat-label">Social Platforms Tracked</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num" data-target="6">0</span>
+        <span class="stat-label">Analysis Tools</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How It Works ── -->
+  <section id="how-it-works" class="section">
+    <div class="container">
+      <span class="badge badge-amber">HOW IT WORKS</span>
+      <h2 class="section-title">The Algorithm Pipeline</h2>
+      <p class="section-sub">Four stages. Fully automated. Delivered before the opening bell.</p>
+
+      <div class="pipeline">
+        <div class="pipeline-line"></div>
+        <div class="pipeline-step">
+          <div class="pipeline-node node-blue"></div>
+          <div class="pipeline-card">
+            <span class="pipeline-phase">PHASE 1</span>
+            <h3>INGEST</h3>
+            <p>Scans Reddit, X, and TikTok for stock ticker mentions. Extracts post text, engagement metrics, and timestamps from 3 subreddits, cashtag searches, and trending videos.</p>
+            <div class="pipeline-tags">
+              <span class="tag tag-orange">r/wallstreetbets</span>
+              <span class="tag tag-orange">r/pennystocks</span>
+              <span class="tag tag-blue">$cashtags</span>
+              <span class="tag tag-pink">TikTok Search</span>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node node-purple"></div>
+          <div class="pipeline-card">
+            <span class="pipeline-phase">PHASE 2</span>
+            <h3>ANALYZE</h3>
+            <p>NLP sentiment classifier processes every mention. LLM-based primary tier handles sarcasm, negation, and context. Enhanced keyword fallback ensures 100% coverage.</p>
+            <div class="pipeline-tags">
+              <span class="tag tag-green">Bullish Detection</span>
+              <span class="tag tag-red">Bearish Detection</span>
+              <span class="tag tag-gray">Negation Handling</span>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node node-amber"></div>
+          <div class="pipeline-card">
+            <span class="pipeline-phase">PHASE 3</span>
+            <h3>DETECT</h3>
+            <p>Compares current sentiment snapshots against historical baselines. Flags dramatic shifts (bearish &rarr; bullish) with severity classification: DRAMATIC, MODERATE, or MINOR.</p>
+            <div class="pipeline-tags">
+              <span class="tag tag-red">Shift Alerts</span>
+              <span class="tag tag-amber">Velocity Tracking</span>
+              <span class="tag tag-green">Momentum Scoring</span>
+            </div>
+          </div>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node node-green"></div>
+          <div class="pipeline-card">
+            <span class="pipeline-phase">PHASE 4</span>
+            <h3>DELIVER</h3>
+            <p>Locks the top 20 stocks at market open. Calculates entry signals, support/resistance levels, and risk-reward ratios. Delivers scored picks to your dashboard with bias indicators.</p>
+            <div class="pipeline-tags">
+              <span class="tag tag-green">Entry Signals</span>
+              <span class="tag tag-blue">Risk/Reward</span>
+              <span class="tag tag-purple">Score 0-100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ── -->
+  <section id="features" class="section section-alt">
+    <div class="container">
+      <span class="badge badge-red">PLATFORM FEATURES</span>
+      <h2 class="section-title">Six Tools. One Platform.</h2>
+      <p class="section-sub">Everything a data-driven trader needs, automated and scored.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon icon-red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <h3>Stock Screener</h3>
+          <p>Multi-factor filtering across 149+ stocks. Filter by gap %, float, volume, price range, and algorithm score in real time.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          </div>
+          <h3>Live Picks Dashboard</h3>
+          <p>20 algorithmically scored stocks locked at market open. Entry signals, support/resistance, and risk-reward ratios updated live.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          </div>
+          <h3>Social Radar</h3>
+          <p>Unified tracker scanning Reddit, X, and TikTok. Velocity signals, crowd sentiment splits, and cross-platform detection.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h3>Methodology Guide</h3>
+          <p>Full transparency into the 7-step scoring framework. Understand exactly how each stock is evaluated and ranked.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <h3>Scoring Framework</h3>
+          <p>Interactive walkthrough of each scoring step. See how gap analysis, float check, volume surge, and catalyst detection combine.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-rose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3>Trade Calculator</h3>
+          <p>Risk-calibrated position sizing. Input your account size, risk tolerance, and the calculator outputs exact share counts and stop levels.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Signal Preview ── -->
+  <section class="section">
+    <div class="container">
+      <div class="split-grid">
+        <div class="split-text">
+          <span class="badge badge-amber">SIGNAL ENGINE</span>
+          <h2 class="section-title text-left">Three Engines. <span class="text-gradient">One Algorithm.</span></h2>
+          <p class="section-sub text-left">
+            Axiarch automates Tim Sykes' 20-year penny stock playbook, then layers on social media
+            sentiment tracking and strict risk-reward math. The result: a research platform that does
+            in seconds what takes most traders hours.
+          </p>
+          <div class="engine-list">
+            <div class="engine-item">
+              <span class="engine-num">01</span>
+              <div>
+                <h4>Pre-Market Quantitative Screener</h4>
+                <p>Scans all stocks for low float, high gap, unusual volume before the bell.</p>
+              </div>
+            </div>
+            <div class="engine-item">
+              <span class="engine-num">02</span>
+              <div>
+                <h4>Catalyst &amp; Sentiment Engine</h4>
+                <p>Monitors Reddit hype velocity and crowd sentiment to detect momentum shifts.</p>
+              </div>
+            </div>
+            <div class="engine-item">
+              <span class="engine-num">03</span>
+              <div>
+                <h4>Intraday Signal Generator</h4>
+                <p>Locks 20 stocks at open, calculates entry signals, support/resistance, and bias.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="split-visual">
+          <div class="signal-preview-card">
+            <div class="sp-header">
+              <h3>Signal Preview</h3>
+              <span class="live-dot"><span class="dot-pulse"></span>LIVE</span>
+            </div>
+            <div class="sp-rows">
+              <div class="sp-row sp-long">
+                <div class="sp-left"><span class="sp-ticker">MVTX</span><span class="sp-bias bias-long">LONG</span></div>
+                <div class="sp-right"><span class="sp-meta">Entry <strong>$2.45</strong></span><span class="sp-meta">Target <strong>$3.89</strong></span><span class="sp-rr">4.8:1</span></div>
+              </div>
+              <div class="sp-row sp-long">
+                <div class="sp-left"><span class="sp-ticker">RSLS</span><span class="sp-bias bias-long">LONG</span></div>
+                <div class="sp-right"><span class="sp-meta">Entry <strong>$1.12</strong></span><span class="sp-meta">Target <strong>$1.87</strong></span><span class="sp-rr">5.0:1</span></div>
+              </div>
+              <div class="sp-row sp-short">
+                <div class="sp-left"><span class="sp-ticker">GXAI</span><span class="sp-bias bias-short">SHORT</span></div>
+                <div class="sp-right"><span class="sp-meta">Entry <strong>$3.20</strong></span><span class="sp-meta">Target <strong>$2.15</strong></span><span class="sp-rr">3.5:1</span></div>
+              </div>
+              <div class="sp-row sp-short">
+                <div class="sp-left"><span class="sp-ticker">NKLA</span><span class="sp-bias bias-short">SHORT</span></div>
+                <div class="sp-right"><span class="sp-meta">Entry <strong>$0.85</strong></span><span class="sp-meta">Target <strong>$0.52</strong></span><span class="sp-rr">4.1:1</span></div>
+              </div>
+            </div>
+            <div class="sp-footer">
+              <span>Simulated data for illustration</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Live Demo: Social Radar ── -->
+  <section id="demo" class="section section-alt">
+    <div class="container">
+      <span class="badge badge-red">LIVE DEMO</span>
+      <h2 class="section-title">See the Social Radar in Action</h2>
+      <p class="section-sub">Our unified Social Radar scans Reddit, X, and TikTok in real time &mdash; tracking which tickers are trending, how fast they're moving, and which direction the crowd is leaning.</p>
+
+      <div class="radar-demo" id="radarDemo">
+        <!-- Header -->
+        <div class="radar-header">
+          <div class="radar-header-left">
+            <svg class="radar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 12l4-4"/><circle cx="12" cy="12" r="2"/></svg>
+            <span class="radar-title">Social Radar</span>
+            <span class="platform-tag tag-orange">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701z"/></svg>
+              Reddit
+            </span>
+            <span class="platform-tag tag-blue">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              X
+            </span>
+            <span class="platform-tag tag-pink">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.8a8.26 8.26 0 0 0 4.76 1.5V6.85a4.79 4.79 0 0 1-1-.16z"/></svg>
+              TikTok
+            </span>
+          </div>
+          <div class="radar-header-right">
+            <span class="radar-scan-count">1,247 posts scanned</span>
+            <span class="live-dot"><span class="dot-pulse"></span>LIVE</span>
+          </div>
+        </div>
+
+        <!-- Platform Stats -->
+        <div class="radar-stats">
+          <div class="radar-stat stat-orange">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701z"/></svg>
+            487 posts
+          </div>
+          <div class="stat-sep"></div>
+          <div class="radar-stat stat-blue">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            512 tweets
+          </div>
+          <div class="stat-sep"></div>
+          <div class="radar-stat stat-pink">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.8a8.26 8.26 0 0 0 4.76 1.5V6.85a4.79 4.79 0 0 1-1-.16z"/></svg>
+            248 videos
+          </div>
+          <div class="stat-sep"></div>
+          <div class="radar-stat stat-white">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span id="tickerCount">7</span> tickers
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="radar-table-wrap">
+          <table class="radar-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>TICKER</th>
+                <th class="text-center">PLATFORMS</th>
+                <th class="text-right">MENTIONS</th>
+                <th class="text-right">VELOCITY</th>
+                <th class="text-center">SIGNAL</th>
+                <th class="text-center" style="min-width:140px">CROWD SENTIMENT</th>
+                <th class="text-center">BIAS</th>
+              </tr>
+            </thead>
+            <tbody id="radarBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="radar-footer">
+          <span>Simulated data for illustration &mdash; real radar scans Reddit, X, and TikTok every 10 minutes</span>
+          <div class="radar-refresh" id="radarRefresh">
+            <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <span id="refreshLabel">Auto-refresh</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center" style="margin-top:2.5rem">
+        <a href="https://axiarchtrading.live" class="btn btn-primary btn-lg">Get Full Access &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Pricing ── -->
+  <section id="pricing" class="section">
+    <div class="container">
+      <span class="badge badge-red">PRICING</span>
+      <h2 class="section-title">One Plan. Full Access. No Surprises.</h2>
+      <p class="section-sub">Everything included. Cancel with one click. No contracts.</p>
+
+      <div class="pricing-card">
+        <div class="pricing-top-bar"></div>
+        <span class="badge badge-red" style="margin-bottom:1.5rem">AXIARCH PRO</span>
+        <div class="pricing-amount">
+          <span class="price-dollar">$29</span><span class="price-cents">.99</span><span class="price-period">/month</span>
+        </div>
+        <p class="pricing-desc">Full access to every tool and feature</p>
+
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> Stock Screener with multi-factor filtering</li>
+          <li><span class="check">&#10003;</span> Daily Top 20 algorithmically scored picks</li>
+          <li><span class="check">&#10003;</span> Social Radar (Reddit + X + TikTok)</li>
+          <li><span class="check">&#10003;</span> NLP sentiment analysis with shift alerts</li>
+          <li><span class="check">&#10003;</span> Risk-Calibrated Trade Calculator</li>
+          <li><span class="check">&#10003;</span> Full Methodology &amp; Framework access</li>
+          <li><span class="check">&#10003;</span> New features as they ship</li>
+        </ul>
+
+        <a href="https://axiarchtrading.live" class="btn btn-primary btn-lg" style="width:100%">Start Your Subscription &rarr;</a>
+        <p class="pricing-fine">Cancel anytime. No long-term commitment. Secure Stripe checkout.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ── -->
+  <section id="faq" class="section section-alt">
+    <div class="container">
+      <span class="badge badge-red">FAQ</span>
+      <h2 class="section-title">Common Questions</h2>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            <span>What exactly does Axiarch do?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p>Axiarch is an algorithmic stock screening platform. It scans thousands of stocks daily using a 7-step scoring framework, tracks real-time social sentiment across Reddit, X, and TikTok, and delivers 20 scored picks every morning before market open. Think of it as your pre-market research assistant.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            <span>Is this a signal service or financial advisor?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p>No. Axiarch is a data tool. It provides algorithmic analysis and social sentiment data to help you make more informed decisions. It does not provide buy/sell recommendations. All trading involves risk and past performance does not guarantee future results.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            <span>How does the sentiment analysis work?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p>We use a multi-tier NLP classifier. The primary tier uses LLM-based analysis (Gemini 2.5 Flash) for context-aware classification that handles sarcasm, negation, and nuance. The fallback tier uses enhanced keyword matching with negation detection. Every post from Reddit, X, and TikTok is classified as Bullish, Bearish, or Neutral.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            <span>Can I cancel anytime?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. There are no contracts or commitments. You can cancel your subscription at any time through the billing portal. Your access continues until the end of your current billing period.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-btn" aria-expanded="false">
+            <span>What markets and stocks does Axiarch cover?</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            <p>Axiarch focuses on US-listed stocks with an emphasis on penny stocks and small caps. The screener scans stocks under $20 with specific criteria for float, gap percentage, and volume. The social radar tracks any ticker mentioned on Reddit, X, or TikTok.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Waitlist ── -->
+  <section id="waitlist" class="section">
+    <div class="container">
+      <div class="waitlist-box">
+        <span class="badge badge-amber">WAITLIST</span>
+        <h2 class="section-title">Not Ready to Commit?</h2>
+        <p class="section-sub">Join the waitlist. We'll notify you about new features, promotions, and early-bird pricing.</p>
+
+        <form class="waitlist-form" id="waitlistForm">
+          <input type="text" placeholder="Your name (optional)" id="waitlistName" class="form-input" />
+          <input type="email" placeholder="Your best email address" id="waitlistEmail" class="form-input" required />
+          <button type="submit" class="btn btn-primary" style="width:100%">Join the Waitlist &rarr;</button>
+        </form>
+        <p class="waitlist-fine">No spam. No selling your data. Unsubscribe anytime.</p>
+        <div id="waitlistMsg" class="waitlist-msg" style="display:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Final CTA ── -->
+  <section class="section section-alt">
+    <div class="container text-center">
+      <h2 class="section-title">The Market Doesn't Wait. <span class="text-gradient">Neither Should You.</span></h2>
+      <p class="section-sub">Get algorithmic trading intelligence delivered to your screen every morning before the bell.</p>
+      <div class="hero-ctas" style="margin-top:2rem">
+        <a href="https://axiarchtrading.live" class="btn btn-primary btn-lg">Start Your Subscription &rarr;</a>
+        <a href="#waitlist" class="btn btn-outline btn-lg">Join the Waitlist</a>
+      </div>
+      <p class="pricing-fine" style="margin-top:1.5rem">$29.99/month. Cancel anytime. Secure Stripe checkout.</p>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <a href="/" class="nav-logo">
+          <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span class="nav-logo-text"><span class="nav-logo-highlight">Axi</span>arch</span>
+        </a>
+        <p class="footer-disclaimer">Axiarch is a data tool, not a financial advisor. All trading involves risk. Past performance does not guarantee future results. Not a solicitation to buy or sell securities.</p>
+      </div>
+      <div class="footer-right">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#demo">Live Demo</a>
+        </div>
+        <div class="footer-col">
+          <h4>Learn</h4>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Access</h4>
+          <a href="https://axiarchtrading.live">Launch App</a>
+          <a href="#waitlist">Join Waitlist</a>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>&copy; 2026 Axiarch Trading. All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

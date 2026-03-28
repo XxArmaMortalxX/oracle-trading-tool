@@ -247,3 +247,22 @@
 - [x] Includes platform badges, velocity signals, sentiment bars, bias badges, CROSS-PLATFORM tags
 - [x] Added LIVE DEMO section between Signal Preview and Pricing with CTA button
 - [x] TypeScript compiles cleanly (0 errors)
+
+## Static Landing Page (Plain HTML/CSS/JS)
+- [x] Create standalone static landing page directory
+- [x] Build index.html with all SEO meta tags, Open Graph, Twitter Cards, JSON-LD
+- [x] Hero section with clear headline and CTAs linking to main app
+- [x] Animated stat counters with IntersectionObserver
+- [x] Platform stats bar
+- [x] How It Works algorithm pipeline (4 stages)
+- [x] Features grid (6 tools)
+- [x] Signal Preview mock cards
+- [x] Live Demo Social Radar animated table (2 data sets cycling every 8s)
+- [x] Pricing section with CTA to main app checkout
+- [x] FAQ accordion (pure CSS/JS)
+- [x] Waitlist form (posts to main app API)
+- [x] Final CTA section
+- [x] Dark theme CSS matching Axiarch design system
+- [x] Responsive design (mobile-first)
+- [x] Test page load speed and SEO readiness
+- [x] Package with README hosting instructions for GitHub Pages / Netlify / Vercel / Cloudflare Pages
