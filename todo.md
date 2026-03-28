@@ -276,3 +276,8 @@
 - [x] Update static HTML landing page pricing and CTAs for free access
 - [x] Write/update tests for free access bypass (freeAccess.test.ts — all 198 tests pass)
 - [x] Verify end-to-end and save checkpoint
+
+## Meta Tags Update for Link Previews
+- [x] Update client/index.html title, description, og:title, og:description, og:image
+- [x] Update static-landing-page/index.html with same meta tags
+- [x] Save checkpoint
