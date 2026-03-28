@@ -5,23 +5,50 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Layout from "./components/Layout";
-import Home from "./pages/Home";
+import Landing from "./pages/Landing";
+import Pricing from "./pages/Pricing";
 import Methodology from "./pages/Methodology";
 import Framework from "./pages/Framework";
 import Calculator from "./pages/Calculator";
 import Screener from "./pages/Screener";
 import Dashboard from "./pages/Dashboard";
+import SubscriptionGate from "./components/SubscriptionGate";
 
 function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path={"/"} component={Home} />
-        <Route path={"/methodology"} component={Methodology} />
-        <Route path={"/framework"} component={Framework} />
-        <Route path={"/calculator"} component={Calculator} />
-        <Route path={"/screener"} component={Screener} />
-        <Route path={"/dashboard"} component={Dashboard} />
+        {/* Public routes */}
+        <Route path={"/"} component={Landing} />
+        <Route path={"/pricing"} component={Pricing} />
+
+        {/* Protected routes — require subscription */}
+        <Route path={"/methodology"}>
+          <SubscriptionGate featureName="Methodology">
+            <Methodology />
+          </SubscriptionGate>
+        </Route>
+        <Route path={"/framework"}>
+          <SubscriptionGate featureName="7-Step Framework">
+            <Framework />
+          </SubscriptionGate>
+        </Route>
+        <Route path={"/calculator"}>
+          <SubscriptionGate featureName="RCT Calculator">
+            <Calculator />
+          </SubscriptionGate>
+        </Route>
+        <Route path={"/screener"}>
+          <SubscriptionGate featureName="Stock Screener">
+            <Screener />
+          </SubscriptionGate>
+        </Route>
+        <Route path={"/dashboard"}>
+          <SubscriptionGate featureName="Live Picks Dashboard">
+            <Dashboard />
+          </SubscriptionGate>
+        </Route>
+
         <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>

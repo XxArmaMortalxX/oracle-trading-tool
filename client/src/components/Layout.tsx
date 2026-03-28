@@ -16,6 +16,7 @@ import {
   Search,
   X,
   Zap,
+  CreditCard,
 } from "lucide-react";
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/calculator", label: "RCT Calculator", icon: Calculator },
   { href: "/screener", label: "Stock Screener", icon: Search },
   { href: "/dashboard", label: "Live Picks", icon: Bell },
+  { href: "/pricing", label: "Pricing", icon: CreditCard },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

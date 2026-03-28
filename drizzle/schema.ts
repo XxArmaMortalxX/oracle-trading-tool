@@ -18,6 +18,36 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
+// ── Waitlist ──
+
+export const waitlist = mysqlTable("waitlist", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  name: varchar("name", { length: 255 }),
+  source: varchar("source", { length: 50 }).default("landing"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WaitlistEntry = typeof waitlist.$inferSelect;
+export type InsertWaitlistEntry = typeof waitlist.$inferInsert;
+
+// ── Subscriptions ──
+
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  status: varchar("status", { length: 30 }).default("inactive").notNull(), // active | past_due | canceled | inactive
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  cancelAtPeriodEnd: int("cancelAtPeriodEnd").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
 // ── Oracle Scan Sessions ──
 
 export const scanSessions = mysqlTable("scan_sessions", {

@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, subscriberProcedure, adminProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import {
   getLatestScanSession,
@@ -569,6 +569,76 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         await upsertNotificationPrefs(ctx.user.id, input);
         return { success: true };
+      }),
+  }),
+
+  // ── Waitlist ──
+  waitlist: router({
+    /** Join the waitlist (public, no auth required) */
+    join: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        name: z.string().max(255).optional(),
+        source: z.string().max(50).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { addToWaitlist } = await import("./stripeService");
+        return addToWaitlist(input.email, input.name, input.source);
+      }),
+
+    /** Get waitlist count (public) */
+    count: publicProcedure.query(async () => {
+      const { getWaitlistCount } = await import("./stripeService");
+      const count = await getWaitlistCount();
+      return { count };
+    }),
+  }),
+
+  // ── Subscription & Billing ──
+  billing: router({
+    /** Get current user's subscription status */
+    status: protectedProcedure.query(async ({ ctx }) => {
+      const { getUserSubscription, isUserSubscribed } = await import("./stripeService");
+      const sub = await getUserSubscription(ctx.user.id);
+      const isSubscribed = await isUserSubscribed(ctx.user.id, ctx.user.openId);
+      const isOwner = ctx.user.role === "admin";
+      return {
+        isSubscribed,
+        isOwner,
+        status: isOwner ? "active" : (sub?.status ?? "inactive"),
+        currentPeriodEnd: sub?.currentPeriodEnd?.toISOString() ?? null,
+        cancelAtPeriodEnd: sub?.cancelAtPeriodEnd === 1,
+      };
+    }),
+
+    /** Create a Stripe checkout session */
+    createCheckout: protectedProcedure
+      .input(z.object({ origin: z.string().url() }))
+      .mutation(async ({ ctx, input }) => {
+        const { createCheckoutSession } = await import("./stripeService");
+        const url = await createCheckoutSession({
+          userId: ctx.user.id,
+          userEmail: ctx.user.email,
+          userName: ctx.user.name,
+          origin: input.origin,
+        });
+        return { url };
+      }),
+
+    /** Create a Stripe billing portal session */
+    createPortal: protectedProcedure
+      .input(z.object({ origin: z.string().url() }))
+      .mutation(async ({ ctx, input }) => {
+        const { getUserSubscription, createBillingPortalSession } = await import("./stripeService");
+        const sub = await getUserSubscription(ctx.user.id);
+        if (!sub?.stripeCustomerId) {
+          throw new Error("No billing account found. Please subscribe first.");
+        }
+        const url = await createBillingPortalSession(
+          sub.stripeCustomerId,
+          `${input.origin}/dashboard`
+        );
+        return { url };
       }),
   }),
 });

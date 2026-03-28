@@ -159,3 +159,23 @@
 - [x] Updated --primary, --ring, --sidebar-primary, --sidebar-ring, --chart-3, .signal-card-neutral, .glow-indigo, .text-gradient
 - [x] Remove "Decoding the" from hero title on Home page (now "The Axiarch Algorithm")
 - [x] TypeScript compiles cleanly
+
+## Landing Page & Waitlist
+- [x] Create waitlist table in DB schema (email, name, timestamp, source) — migration 0006
+- [x] Add tRPC routes: waitlist.join (public), waitlist.count (protected)
+- [x] Build Landing.tsx at root URL with hero, features grid, signal preview, pricing, waitlist form
+- [x] Created Landing.tsx as new root page; old Home.tsx preserved
+- [x] Update App.tsx routing: / → Landing, /pricing → Pricing, all tools gated
+
+## Stripe Paywall ($29.99/month)
+- [x] Add Stripe feature via webdev_add_feature, installed stripe package
+- [x] Create stripeProducts.ts with AXIARCH_PRO ($29.99/month)
+- [x] Create subscriptions table in DB schema — migration 0006
+- [x] Build subscriberProcedure in trpc.ts with owner bypass (OWNER_OPEN_ID)
+- [x] Gate all tool pages behind SubscriptionGate component
+- [x] Build Pricing.tsx with Stripe checkout integration
+- [x] Handle Stripe webhooks: checkout.session.completed, invoice.paid, subscription.updated/deleted
+- [x] Billing portal for managing subscription (billing.createPortal route)
+- [x] Owner (admin) always has free access — isOwner check in billing.status and subscriberProcedure
+- [x] Write 11 tests for waitlist, subscription, products, and owner bypass
+- [x] All 135 tests passing across 9 test files
