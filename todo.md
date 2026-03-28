@@ -223,3 +223,11 @@
 - [x] Write 40 tests: negation (7), sarcasm (3), temporal (2), real-world (6), confidence (3), batch (4), edge cases (6), basic (6), API (3)
 - [x] All 191 tests passing across 11 test files (40 new NLP + 151 existing)
 - [x] LLM cooldown: 5 min after failure, auto-retry, graceful fallback to enhanced keywords
+
+## SEO Meta Tags & Descriptions
+- [x] Add meta description, keywords (12 targeted terms), and author tags
+- [x] Add Open Graph tags for Facebook/LinkedIn sharing
+- [x] Add Twitter Card tags (summary_large_image) for X sharing
+- [x] Add JSON-LD structured data: SoftwareApplication, Organization, FAQPage (4 Q&As)
+- [x] Add canonical URL (axiarchtrading.live), robots index/follow, theme-color
+- [x] Add Apple mobile web app meta tags
