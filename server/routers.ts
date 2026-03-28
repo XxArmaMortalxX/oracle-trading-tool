@@ -651,13 +651,17 @@ export const appRouter = router({
     /** Get current user's subscription status */
     status: protectedProcedure.query(async ({ ctx }) => {
       const { getUserSubscription, isUserSubscribed } = await import("./stripeService");
+      const { isFreeAccessPeriod, FREE_ACCESS_UNTIL } = await import("../shared/const");
       const sub = await getUserSubscription(ctx.user.id);
       const isSubscribed = await isUserSubscribed(ctx.user.id, ctx.user.openId);
       const isOwner = ctx.user.role === "admin";
+      const freeAccess = isFreeAccessPeriod();
       return {
-        isSubscribed,
+        isSubscribed: isSubscribed || freeAccess,
         isOwner,
-        status: isOwner ? "active" : (sub?.status ?? "inactive"),
+        isFreeAccess: freeAccess,
+        freeAccessUntil: FREE_ACCESS_UNTIL.toISOString(),
+        status: isOwner ? "active" : freeAccess ? "free_access" : (sub?.status ?? "inactive"),
         currentPeriodEnd: sub?.currentPeriodEnd?.toISOString() ?? null,
         cancelAtPeriodEnd: sub?.cancelAtPeriodEnd === 1,
       };

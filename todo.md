@@ -266,3 +266,13 @@
 - [x] Responsive design (mobile-first)
 - [x] Test page load speed and SEO readiness
 - [x] Package with README hosting instructions for GitHub Pages / Netlify / Vercel / Cloudflare Pages
+
+## Free Access Mode (1-Month, No Signup Required)
+- [x] Add FREE_ACCESS_UNTIL date constant (1 month from now)
+- [x] Update SubscriptionGate to bypass paywall when current date < FREE_ACCESS_UNTIL
+- [x] Update backend subscriberProcedure to allow all users during free period
+- [x] Update Landing.tsx copy to advertise free access (no payment required)
+- [x] Update Pricing.tsx to show free access banner with countdown
+- [x] Update static HTML landing page pricing and CTAs for free access
+- [x] Write/update tests for free access bypass (freeAccess.test.ts — all 198 tests pass)
+- [x] Verify end-to-end and save checkpoint

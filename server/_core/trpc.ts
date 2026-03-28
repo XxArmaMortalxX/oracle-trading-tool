@@ -28,6 +28,7 @@ const requireUser = t.middleware(async opts => {
 export const protectedProcedure = t.procedure.use(requireUser);
 
 // Subscriber procedure: requires active subscription OR owner/admin role
+// During free access period, all authenticated users pass through.
 export const subscriberProcedure = t.procedure.use(
   t.middleware(async opts => {
     const { ctx, next } = opts;
@@ -38,6 +39,12 @@ export const subscriberProcedure = t.procedure.use(
 
     // Owner (admin) always has free access
     if (ctx.user.role === 'admin') {
+      return next({ ctx: { ...ctx, user: ctx.user } });
+    }
+
+    // Free access period — everyone gets in
+    const { isFreeAccessPeriod } = await import('../../shared/const');
+    if (isFreeAccessPeriod()) {
       return next({ ctx: { ...ctx, user: ctx.user } });
     }
 

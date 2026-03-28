@@ -1,8 +1,9 @@
 /*
  * Pricing Page — Axiarch Pro subscription checkout
+ * During free access period, shows a banner + directs users to tools
  */
 import { motion } from "framer-motion";
-import { Check, ArrowRight, Lock, CreditCard, Shield } from "lucide-react";
+import { Check, ArrowRight, Lock, CreditCard, Shield, Gift } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -10,6 +11,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { toast } from "sonner";
 import { useSearch } from "wouter";
+import { Link } from "wouter";
+import { isFreeAccessPeriod, FREE_ACCESS_UNTIL } from "../../../shared/const";
+import { useState, useEffect } from "react";
 
 const proFeatures = [
   "Real-time stock screener with Axiarch scoring",
@@ -22,11 +26,41 @@ const proFeatures = [
   "Priority access to new features",
 ];
 
+function FreeCountdown() {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    function update() {
+      const now = new Date();
+      const diff = FREE_ACCESS_UNTIL.getTime() - now.getTime();
+      if (diff <= 0) {
+        setTimeLeft("Expired");
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      setTimeLeft(`${days}d ${hours}h ${mins}m`);
+    }
+    update();
+    const interval = setInterval(update, 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center justify-center gap-3 text-sm">
+      <span className="text-muted-foreground">Free access ends in</span>
+      <span className="font-mono font-bold text-emerald text-lg">{timeLeft}</span>
+    </div>
+  );
+}
+
 export default function Pricing() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const search = useSearch();
   const params = new URLSearchParams(search);
   const cancelled = params.get("subscription") === "cancelled";
+  const freeAccess = isFreeAccessPeriod();
 
   const billingStatus = trpc.billing.status.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -79,6 +113,30 @@ export default function Pricing() {
         </motion.div>
       )}
 
+      {/* Free Access Banner */}
+      {freeAccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-lg mx-auto mb-10 p-6 rounded-xl bg-gradient-to-br from-emerald/10 to-indigo/10 border border-emerald/30 text-center"
+        >
+          <Gift className="w-8 h-8 text-emerald mx-auto mb-3" />
+          <h2 className="font-heading text-2xl font-bold mb-2">Everything is Free Right Now</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            All tools are unlocked for everyone until{" "}
+            {FREE_ACCESS_UNTIL.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.
+            No signup. No credit card.
+          </p>
+          <FreeCountdown />
+          <Link href="/screener">
+            <Button size="lg" className="gap-2 bg-emerald hover:bg-emerald/90 text-white mt-5">
+              Start Using Free
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
+        </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -86,10 +144,12 @@ export default function Pricing() {
         className="text-center mb-14"
       >
         <h1 className="font-heading text-4xl font-bold tracking-tight mb-3">
-          Unlock the Full Algorithm
+          {freeAccess ? "After the Free Period" : "Unlock the Full Algorithm"}
         </h1>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          Get complete access to every tool, signal, and feature in the Axiarch Trading Algorithm.
+          {freeAccess
+            ? "When the free access period ends, subscribe to keep using all tools."
+            : "Get complete access to every tool, signal, and feature in the Axiarch Trading Algorithm."}
         </p>
       </motion.div>
 
@@ -129,7 +189,7 @@ export default function Pricing() {
                 <p className="text-sm font-medium text-emerald">Owner Access</p>
                 <p className="text-xs text-muted-foreground mt-1">You have permanent free access as the platform owner.</p>
               </div>
-            ) : isSubscribed ? (
+            ) : isSubscribed && !freeAccess ? (
               <div className="space-y-3">
                 <div className="text-center p-4 rounded-lg bg-emerald/10 border border-emerald/20">
                   <Check className="w-6 h-6 text-emerald mx-auto mb-2" />
@@ -150,6 +210,27 @@ export default function Pricing() {
                 >
                   <CreditCard className="w-4 h-4" />
                   {createPortal.isPending ? "Loading..." : "Manage Billing"}
+                </Button>
+              </div>
+            ) : freeAccess ? (
+              <div className="text-center p-4 rounded-lg bg-emerald/10 border border-emerald/20">
+                <Gift className="w-6 h-6 text-emerald mx-auto mb-2" />
+                <p className="text-sm font-medium text-emerald">Currently Free</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  All tools are free until {FREE_ACCESS_UNTIL.toLocaleDateString("en-US", { month: "long", day: "numeric" })}. Subscribe now to lock in access after.
+                </p>
+                <Button
+                  className="w-full gap-2 bg-indigo hover:bg-indigo/90 text-white mt-4"
+                  size="lg"
+                  onClick={handleSubscribe}
+                  disabled={createCheckout.isPending || authLoading}
+                >
+                  <Lock className="w-4 h-4" />
+                  {createCheckout.isPending
+                    ? "Creating checkout..."
+                    : !isAuthenticated
+                    ? "Sign In & Subscribe Early"
+                    : "Subscribe Early — Lock In Access"}
                 </Button>
               </div>
             ) : (

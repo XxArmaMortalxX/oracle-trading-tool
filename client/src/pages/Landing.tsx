@@ -35,6 +35,8 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import SocialRadarDemo from "@/components/SocialRadarDemo";
+import { isFreeAccessPeriod, FREE_ACCESS_UNTIL } from "../../../shared/const";
+import { Gift } from "lucide-react";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663392552309/VS9gyY9Ztpy3Frg32hxgmx/hero-candlestick-NhJRVHJuCBPymrGi72nFzr.webp";
@@ -299,12 +301,12 @@ export default function Landing() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4">
-              <a href={getLoginUrl("/pricing")}>
+              <Link href="/screener">
                 <Button size="lg" className="gap-2 bg-indigo hover:bg-indigo/90 text-white h-12 px-8 text-base">
-                  Get Started — $29.99/mo
+                  {isFreeAccessPeriod() ? "Try It Free — No Signup" : "Get Started — $29.99/mo"}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-              </a>
+              </Link>
               <a href="#waitlist">
                 <Button size="lg" variant="outline" className="gap-2 border-border/60 h-12 px-8 text-base">
                   Join the Waitlist
@@ -312,18 +314,25 @@ export default function Landing() {
               </a>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex items-center gap-6 mt-8 text-xs text-muted-foreground">
+            {isFreeAccessPeriod() && (
+              <motion.div variants={fadeUp} className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald/10 border border-emerald/30">
+                <Gift className="w-4 h-4 text-emerald" />
+                <span className="text-sm text-emerald font-medium">Free for everyone until {FREE_ACCESS_UNTIL.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              </motion.div>
+            )}
+
+            <motion.div variants={fadeUp} className="flex items-center gap-6 mt-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" />
-                Cancel anytime
+                {isFreeAccessPeriod() ? "No credit card required" : "Cancel anytime"}
               </span>
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
-                Setup in 60 seconds
+                {isFreeAccessPeriod() ? "Instant access" : "Setup in 60 seconds"}
               </span>
               <span className="flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
-                Secure checkout
+                {isFreeAccessPeriod() ? "All tools unlocked" : "Secure checkout"}
               </span>
             </motion.div>
           </motion.div>
@@ -693,10 +702,12 @@ export default function Landing() {
               PRICING
             </span>
             <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-              One Plan. Full Access. No Surprises.
+              {isFreeAccessPeriod() ? "Free For Everyone. Right Now." : "One Plan. Full Access. No Surprises."}
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Everything included. Cancel with one click. No contracts.
+              {isFreeAccessPeriod()
+                ? `Every tool is free until ${FREE_ACCESS_UNTIL.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. No signup. No credit card. Just use it.`
+                : "Everything included. Cancel with one click. No contracts."}
             </p>
           </motion.div>
 
@@ -712,16 +723,33 @@ export default function Landing() {
               <CardContent className="p-10">
                 <div className="text-center mb-8">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo/10 border border-indigo/20 text-indigo text-xs font-mono font-medium tracking-wider mb-5">
-                    AXIARCH PRO
+                    {isFreeAccessPeriod() ? "FREE ACCESS" : "AXIARCH PRO"}
                   </span>
-                  <div className="flex items-baseline justify-center gap-1 mb-2">
-                    <span className="font-heading text-6xl font-bold text-foreground">$29</span>
-                    <span className="font-heading text-2xl font-bold text-muted-foreground">.99</span>
-                    <span className="text-muted-foreground text-sm ml-1">/month</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Full access to every tool and feature
-                  </p>
+                  {isFreeAccessPeriod() ? (
+                    <>
+                      <div className="flex items-baseline justify-center gap-1 mb-2">
+                        <span className="font-heading text-6xl font-bold text-emerald">$0</span>
+                        <span className="text-muted-foreground text-sm ml-1">/month</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Free until {FREE_ACCESS_UNTIL.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <p className="text-xs text-muted-foreground/60 mt-1">
+                        Then $29.99/month
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline justify-center gap-1 mb-2">
+                        <span className="font-heading text-6xl font-bold text-foreground">$29</span>
+                        <span className="font-heading text-2xl font-bold text-muted-foreground">.99</span>
+                        <span className="text-muted-foreground text-sm ml-1">/month</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Full access to every tool and feature
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="space-y-3.5 mb-10">
@@ -735,14 +763,25 @@ export default function Landing() {
                   ))}
                 </div>
 
-                <a href={getLoginUrl("/pricing")}>
-                  <Button className="w-full gap-2 bg-indigo hover:bg-indigo/90 text-white h-12 text-base" size="lg">
-                    Get Started Now
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </a>
+                {isFreeAccessPeriod() ? (
+                  <Link href="/screener">
+                    <Button className="w-full gap-2 bg-emerald hover:bg-emerald/90 text-white h-12 text-base" size="lg">
+                      Start Using Free
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <a href={getLoginUrl("/pricing")}>
+                    <Button className="w-full gap-2 bg-indigo hover:bg-indigo/90 text-white h-12 text-base" size="lg">
+                      Get Started Now
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </a>
+                )}
                 <p className="text-xs text-muted-foreground text-center mt-4">
-                  Cancel anytime. No long-term commitment. Secure Stripe checkout.
+                  {isFreeAccessPeriod()
+                    ? "No signup required. No credit card. Just start."
+                    : "Cancel anytime. No long-term commitment. Secure Stripe checkout."}
                 </p>
               </CardContent>
             </Card>
@@ -872,12 +911,12 @@ export default function Landing() {
             Get algorithmic trading intelligence delivered to your screen every morning before the bell.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href={getLoginUrl("/pricing")}>
-              <Button size="lg" className="gap-2 bg-indigo hover:bg-indigo/90 text-white h-12 px-8 text-base">
-                Start Your Subscription
+            <Link href="/screener">
+              <Button size="lg" className={`gap-2 text-white h-12 px-8 text-base ${isFreeAccessPeriod() ? 'bg-emerald hover:bg-emerald/90' : 'bg-indigo hover:bg-indigo/90'}`}>
+                {isFreeAccessPeriod() ? "Start Using Free" : "Start Your Subscription"}
                 <ArrowRight className="w-4 h-4" />
               </Button>
-            </a>
+            </Link>
             <a href="#waitlist">
               <Button size="lg" variant="outline" className="gap-2 border-border/60 h-12 px-8 text-base">
                 Join the Waitlist
@@ -885,7 +924,9 @@ export default function Landing() {
             </a>
           </div>
           <p className="text-xs text-muted-foreground mt-6">
-            $29.99/month. Cancel anytime. Secure Stripe checkout.
+            {isFreeAccessPeriod()
+              ? `Free for everyone until ${FREE_ACCESS_UNTIL.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. No signup required.`
+              : "$29.99/month. Cancel anytime. Secure Stripe checkout."}
           </p>
         </motion.div>
       </section>

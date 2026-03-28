@@ -1,6 +1,7 @@
 /*
  * SubscriptionGate — wraps pages that require an active subscription.
- * Shows a paywall prompt if the user is not subscribed.
+ * During the free access period, ALL users (even unauthenticated) get through.
+ * After the free period, shows a paywall prompt if the user is not subscribed.
  * Owner/admin users always pass through.
  */
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -8,8 +9,10 @@ import { trpc } from "@/lib/trpc";
 import { getLoginUrl } from "@/const";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Lock, ArrowRight, Loader2, Gift } from "lucide-react";
 import { Link } from "wouter";
+import { FREE_ACCESS_UNTIL, isFreeAccessPeriod } from "../../../shared/const";
+import { useState, useEffect } from "react";
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -17,12 +20,56 @@ interface SubscriptionGateProps {
   featureName?: string;
 }
 
+function FreeAccessBanner() {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    function update() {
+      const now = new Date();
+      const diff = FREE_ACCESS_UNTIL.getTime() - now.getTime();
+      if (diff <= 0) {
+        setTimeLeft("Expired");
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      setTimeLeft(`${days}d ${hours}h remaining`);
+    }
+    update();
+    const interval = setInterval(update, 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-gradient-to-r from-emerald-500/10 to-indigo/10 border border-emerald-500/30 rounded-lg px-4 py-3 mb-6 flex items-center gap-3">
+      <Gift className="w-5 h-5 text-emerald-400 shrink-0" />
+      <div className="flex-1 min-w-0">
+        <span className="text-sm font-medium text-emerald-400">Free Access Period</span>
+        <span className="text-xs text-muted-foreground ml-2">— {timeLeft}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function SubscriptionGate({ children, featureName }: SubscriptionGateProps) {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
 
+  // During free access period, let everyone through immediately — no login required
+  if (isFreeAccessPeriod()) {
+    return (
+      <>
+        <div className="container pt-4">
+          <FreeAccessBanner />
+        </div>
+        {children}
+      </>
+    );
+  }
+
+  // After free period — original paywall logic
   const billingStatus = trpc.billing.status.useQuery(undefined, {
     enabled: isAuthenticated,
-    staleTime: 60_000, // Cache for 1 min to avoid excessive checks
+    staleTime: 60_000,
   });
 
   // Still loading auth or billing
