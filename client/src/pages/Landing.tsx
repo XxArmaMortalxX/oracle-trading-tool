@@ -208,6 +208,10 @@ export default function Landing() {
   const [name, setName] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  useEffect(() => {
+    document.title = "Axiarch Trading Algorithm | AI Stock Screener";
+  }, []);
+
   const joinWaitlist = trpc.waitlist.join.useMutation({
     onSuccess: (data) => {
       if (data.alreadyExists) {
@@ -234,7 +238,7 @@ export default function Landing() {
       {/* ── Hero Section ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={HERO_IMG} alt="" className="w-full h-full object-cover opacity-30" />
+          <img src={HERO_IMG} alt="Stock market candlestick chart background showing trading data" className="w-full h-full object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
           {/* Subtle grid overlay */}
           <div

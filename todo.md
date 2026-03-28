@@ -231,3 +231,9 @@
 - [x] Add JSON-LD structured data: SoftwareApplication, Organization, FAQPage (4 Q&As)
 - [x] Add canonical URL (axiarchtrading.live), robots index/follow, theme-color
 - [x] Add Apple mobile web app meta tags
+
+## SEO Fixes (Landing Page)
+- [x] Reduce keywords from 12 to 6 focused terms
+- [x] Title set to 45 chars via document.title in Landing component + index.html
+- [x] Description shortened to 131 chars (within 50-160 range)
+- [x] Added alt text to hero background image
