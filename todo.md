@@ -195,3 +195,18 @@
 - [x] Add section labels (HOW IT WORKS, PLATFORM FEATURES, SIGNAL ENGINE, etc.)
 - [x] Polish animations, spacing, and visual flow
 - [x] Stronger final CTA: "The Market Doesn't Wait. Neither Should You."
+
+## Unified Social Radar (Reddit + X + TikTok)
+- [x] Build X (Twitter) tracker module (xTracker.ts) — Data API user tweets + public cashtag search
+- [x] Build TikTok tracker module (tiktokTracker.ts) — Data API keyword search for stock tickers
+- [x] Create unified social radar aggregator (socialRadarAggregator.ts) merging all 3 platforms
+- [x] Combine mention counts, engagement, velocity signals, and sentiment across platforms
+- [x] Per-platform breakdown with Reddit/X/TikTok badges showing mention counts
+- [x] New tRPC routes: socialRadar.unified (cached), socialRadar.refresh (all platforms)
+- [x] Rewritten SocialRadar UI with platform icons, stats bar, combined metrics
+- [x] CROSS-PLATFORM badge for tickers appearing on all 3 platforms
+- [x] Sentiment classifier reused across all platforms (same keyword matching)
+- [x] Shift detection integrated into unified refresh flow
+- [x] Write 16 tests for unified aggregator (merging, sentiment, platform breakdown)
+- [x] All 151 tests passing across 10 test files
+- [x] Legacy Reddit routes preserved for backward compatibility

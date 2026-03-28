@@ -43,6 +43,10 @@ import {
   getActiveAlertCount,
   type DetectedShift,
 } from "./sentimentShiftDetector";
+import {
+  getUnifiedRadarCached,
+  refreshUnifiedRadar,
+} from "./socialRadarAggregator";
 
 // ── Server-side cache for screener data ──
 // Caches the raw fetched stock data for 5 minutes to reduce API calls.
@@ -398,7 +402,55 @@ export const appRouter = router({
       }),
   }),
 
-  // ── Reddit Mention Velocity + Sentiment ──
+  // ── Unified Social Radar (Reddit + X + TikTok) ──
+  socialRadar: router({
+    /** Get unified radar data from all platforms (cached) */
+    unified: publicProcedure.query(async () => {
+      const snapshot = await getUnifiedRadarCached();
+      return {
+        tickers: snapshot.tickers
+          .filter(t => t.totalMentions >= 2)
+          .slice(0, 50),
+        totalTickers: snapshot.totalTickers,
+        totalContentScanned: snapshot.totalContentScanned,
+        fetchedAt: snapshot.fetchedAt.toISOString(),
+      };
+    }),
+
+    /** Refresh all platforms and rebuild unified radar */
+    refresh: publicProcedure.mutation(async () => {
+      console.log(`[SocialRadar] Manual refresh triggered across all platforms...`);
+      const { snapshot, platformResults } = await refreshUnifiedRadar();
+
+      // Also run shift detection on the fresh Reddit sentiment
+      let shiftResult: { shifts: DetectedShift[]; notified: boolean } = { shifts: [], notified: false };
+      try {
+        const redditSentiment = await fetchRedditSentimentCached();
+        shiftResult = await runShiftDetection(redditSentiment.tickers);
+      } catch (err) {
+        console.warn("[SocialRadar] Shift detection failed:", err);
+      }
+
+      return {
+        totalTickers: snapshot.totalTickers,
+        totalContentScanned: snapshot.totalContentScanned,
+        fetchedAt: snapshot.fetchedAt.toISOString(),
+        platformResults,
+        shiftsDetected: shiftResult.shifts.length,
+        shiftNotified: shiftResult.notified,
+        shifts: shiftResult.shifts.map(s => ({
+          ticker: s.ticker,
+          direction: s.direction,
+          severity: s.severity,
+          shiftMagnitude: s.shiftMagnitude,
+          previousBullishPct: s.previousBullishPct,
+          newBullishPct: s.newBullishPct,
+        })),
+      };
+    }),
+  }),
+
+  // ── Reddit Mention Velocity + Sentiment (legacy, kept for compatibility) ──
   reddit: router({
     /** Get current Reddit mention velocity data with sentiment classification (cached, fast) */
     trending: publicProcedure.query(async () => {
