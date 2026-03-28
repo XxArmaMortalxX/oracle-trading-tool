@@ -139,7 +139,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <footer className="border-t border-border/50 mt-20">
         <div className="container py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            The Axiarch Trading Algorithm is an independent research tool. Not affiliated with StocksToTrade.
+            The Axiarch Trading Algorithm is an independent research tool.
           </p>
           <p className="text-xs text-muted-foreground/60">
             For educational purposes only. Not financial advice.

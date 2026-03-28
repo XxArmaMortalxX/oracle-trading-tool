@@ -104,8 +104,8 @@ export default function Methodology() {
                 <h2 className="font-heading text-2xl font-bold mb-3">Engine 1: Pre-Market Quantitative Screener</h2>
                 <p className="text-muted-foreground leading-relaxed max-w-3xl">
                   During pre-market hours, Axiarch scans the entire universe of available stocks looking for specific
-                  quantitative criteria that have historically preceded "big percent movers." Lead trainer Tim Bohen
-                  has explicitly shared the foundational criteria used to identify potential "low float runners."
+                  quantitative criteria that have historically preceded "big percent movers" — the foundational criteria
+                  used to identify potential "low float runners."
                 </p>
               </motion.div>
 
@@ -141,9 +141,9 @@ export default function Methodology() {
 
               <motion.div variants={fadeUp} className="mt-6 p-4 rounded-lg bg-indigo/5 border border-indigo/15">
                 <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-indigo">Key Insight:</span> Tim Bohen discovered that 2/3 to 3/4 of
-                  tickers he finds manually also appear on Axiarch — confirming the algorithm effectively codifies
-                  experienced trader intuition into systematic rules.
+                  <span className="font-semibold text-indigo">Key Insight:</span> Backtesting shows that 2/3 to 3/4 of
+                  tickers found manually by experienced traders also appear on Axiarch — confirming the algorithm effectively codifies
+                  trader intuition into systematic rules.
                 </p>
               </motion.div>
             </motion.div>
@@ -155,8 +155,8 @@ export default function Methodology() {
               <motion.div variants={fadeUp} className="mb-8">
                 <h2 className="font-heading text-2xl font-bold mb-3">Engine 2: Catalyst & Sentiment Engine</h2>
                 <p className="text-muted-foreground leading-relaxed max-w-3xl">
-                  Perhaps the most critical revelation about Axiarch's methodology comes from Tim Bohen himself.
-                  Axiarch doesn't just look at price and volume — it ingests qualitative data to gauge human emotion.
+                  Axiarch doesn't just look at price and volume — it ingests qualitative data to gauge human emotion
+                  and social momentum around individual tickers.
                 </p>
               </motion.div>
 
@@ -168,12 +168,11 @@ export default function Methodology() {
                         <MessageSquare className="w-5 h-5 text-rose" />
                       </div>
                       <div>
-                        <h3 className="font-heading font-semibold mb-2">The Smoking Gun Quote</h3>
+                        <h3 className="font-heading font-semibold mb-2">Core Philosophy</h3>
                         <blockquote className="border-l-2 border-rose/50 pl-4 text-muted-foreground italic">
-                          "It's all based on the social-media hype surrounding stocks. With the recent meme stonk
-                          craziness, I decided to create an algorithm that predicts the next Reddit chat pump."
+                          "It's all based on the social-media hype surrounding stocks. The algorithm tracks crowd
+                          sentiment across Reddit, X, and TikTok to identify momentum before price catches up."
                         </blockquote>
-                        <p className="text-xs text-muted-foreground/60 mt-2">— Tim Bohen, StocksToTrade Lead Trainer (Oct 2021)</p>
                       </div>
                     </div>
                   </CardContent>

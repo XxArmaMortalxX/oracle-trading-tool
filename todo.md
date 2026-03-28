@@ -285,3 +285,7 @@
 ## Cloudflare Web Analytics
 - [x] Add Cloudflare analytics snippet to client/index.html
 - [x] Add Cloudflare analytics snippet to static-landing-page/index.html
+
+## Remove Tim Bohen / Stocks to Trade References
+- [x] Remove all Tim Bohen and Stocks to Trade references from main app
+- [x] Remove all Tim Bohen and Stocks to Trade references from static landing page (none found)
