@@ -179,3 +179,6 @@
 - [x] Owner (admin) always has free access — isOwner check in billing.status and subscriberProcedure
 - [x] Write 11 tests for waitlist, subscription, products, and owner bypass
 - [x] All 135 tests passing across 9 test files
+
+## Bug Fixes
+- [x] Fix OAuth login 403 error — reverted state param to simple base64(redirectUri) format
