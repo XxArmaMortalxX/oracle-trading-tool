@@ -1,0 +1,9 @@
+Landing page preview captured. The hero section looks great:
+- "Stop Guessing. Start Knowing." headline in large bold text with red gradient on "Start Knowing"
+- Subtitle text visible and readable
+- "Used by day traders who want data, not opinions" tagline
+- Two CTA buttons: "Get Started — $29.99/mo" (red) and "Join the Waitlist" (outline)
+- Trust badges at bottom: Cancel anytime, Setup in 60 seconds, Secure checkout
+- Background candlestick chart image with dark overlay
+- Grid overlay subtle pattern visible
+- TypeScript: no errors, dev server running fine

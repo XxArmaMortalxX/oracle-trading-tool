@@ -182,3 +182,16 @@
 
 ## Bug Fixes
 - [x] Fix OAuth login 403 error — reverted state param to simple base64(redirectUri) format
+
+## Landing Page Refinement
+- [x] Sharpen hero: "Stop Guessing. Start Knowing." with urgency copy
+- [x] Add "How It Works" 3-step section with connector arrows
+- [x] Add animated platform stats bar (149+ stocks, 20 picks, 3 subs, 6 tools)
+- [x] Add scrolling ticker tape animation for market energy
+- [x] Improve feature cards with outcome-focused copy and hover effects
+- [x] Add FAQ accordion section (5 questions addressing common objections)
+- [x] Add 4th signal preview card for more visual weight
+- [x] Improve CTA hierarchy with trust badges (Cancel anytime, 60s setup, Secure checkout)
+- [x] Add section labels (HOW IT WORKS, PLATFORM FEATURES, SIGNAL ENGINE, etc.)
+- [x] Polish animations, spacing, and visual flow
+- [x] Stronger final CTA: "The Market Doesn't Wait. Neither Should You."
