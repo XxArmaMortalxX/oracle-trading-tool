@@ -152,3 +152,10 @@
 - [x] Update shared/const.ts comment
 - [x] TypeScript compiles cleanly, all 124 tests pass
 - [ ] VITE_APP_TITLE is a built-in secret (cannot be changed via code)
+
+## Color Scheme Change & Title Fix
+- [x] Change accent color from indigo to red across CSS variables and theme (oklch hue 277 → 25)
+- [x] All indigo Tailwind classes now resolve to red via --color-indigo theme variable
+- [x] Updated --primary, --ring, --sidebar-primary, --sidebar-ring, --chart-3, .signal-card-neutral, .glow-indigo, .text-gradient
+- [x] Remove "Decoding the" from hero title on Home page (now "The Axiarch Algorithm")
+- [x] TypeScript compiles cleanly

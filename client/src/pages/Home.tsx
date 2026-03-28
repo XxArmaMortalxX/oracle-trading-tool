@@ -113,7 +113,7 @@ export default function Home() {
               variants={fadeUp}
               className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6"
             >
-              Decoding the{" "}
+              The{" "}
               <span className="text-gradient">Axiarch Algorithm</span>
             </motion.h1>
 
