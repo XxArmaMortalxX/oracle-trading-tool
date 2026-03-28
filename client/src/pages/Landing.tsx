@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
+import SocialRadarDemo from "@/components/SocialRadarDemo";
 
 const HERO_IMG =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663392552309/VS9gyY9Ztpy3Frg32hxgmx/hero-candlestick-NhJRVHJuCBPymrGi72nFzr.webp";
@@ -627,6 +628,53 @@ export default function Landing() {
                 <Eye className="w-3.5 h-3.5 text-muted-foreground/50" />
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Live Demo ── */}
+      <section className="bg-card/20 border-y border-border/30 py-24">
+        <div className="container">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-14"
+          >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo/10 border border-indigo/20 text-indigo text-xs font-mono font-medium tracking-wider mb-4">
+              LIVE DEMO
+            </span>
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3">
+              See the Social Radar in Action
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Our unified Social Radar scans Reddit, X, and TikTok in real time — tracking which tickers are trending, how fast they're moving, and which direction the crowd is leaning.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="max-w-5xl mx-auto"
+          >
+            <SocialRadarDemo />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="text-center mt-10"
+          >
+            <Link href="#pricing">
+              <Button size="lg" className="bg-indigo hover:bg-indigo/90 text-white gap-2 font-semibold">
+                Get Full Access <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>

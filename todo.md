@@ -241,3 +241,9 @@
 ## Landing Page Copy Refinement
 - [x] Replace hero: "Detect Sentiment Shifts in Penny Stocks Before the Move Happens."
 - [x] Replace How It Works with 4-stage algorithm pipeline (INGEST → ANALYZE → DETECT → DELIVER) with color-coded cards, connecting gradient line, source tags, and phase node dots
+
+## Live Demo Section on Landing Page
+- [x] Built SocialRadarDemo component with animated mock (2 data sets cycling every 8s)
+- [x] Includes platform badges, velocity signals, sentiment bars, bias badges, CROSS-PLATFORM tags
+- [x] Added LIVE DEMO section between Signal Preview and Pricing with CTA button
+- [x] TypeScript compiles cleanly (0 errors)

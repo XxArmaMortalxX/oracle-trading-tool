@@ -1,0 +1,7 @@
+The deployed site still shows old hero text ("Stop Guessing. Start Knowing.") and old How It Works.
+The dev server has the updated version with the new headline and pipeline.
+Need to capture the Social Radar from the dev server instead.
+The Social Radar is behind auth - need to navigate to the dev server and log in first.
+Alternative approach: Build a realistic animated mock of the Social Radar directly in the landing page
+using CSS animations. This avoids the need for a screenshot/GIF and creates a more polished,
+always-up-to-date demo experience.
