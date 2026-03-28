@@ -281,3 +281,7 @@
 - [x] Update client/index.html title, description, og:title, og:description, og:image
 - [x] Update static-landing-page/index.html with same meta tags
 - [x] Save checkpoint
+
+## Cloudflare Web Analytics
+- [x] Add Cloudflare analytics snippet to client/index.html
+- [x] Add Cloudflare analytics snippet to static-landing-page/index.html
