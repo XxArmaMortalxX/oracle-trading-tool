@@ -237,3 +237,7 @@
 - [x] Title set to 45 chars via document.title in Landing component + index.html
 - [x] Description shortened to 131 chars (within 50-160 range)
 - [x] Added alt text to hero background image
+
+## Landing Page Copy Refinement
+- [x] Replace hero: "Detect Sentiment Shifts in Penny Stocks Before the Move Happens."
+- [x] Replace How It Works with 4-stage algorithm pipeline (INGEST → ANALYZE → DETECT → DELIVER) with color-coded cards, connecting gradient line, source tags, and phase node dots

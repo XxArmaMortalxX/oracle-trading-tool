@@ -148,24 +148,38 @@ const features = [
   },
 ];
 
-const howItWorks = [
+const pipelineSteps = [
   {
-    step: "01",
-    title: "Algorithm Scans",
-    desc: "Every morning, Axiarch scans thousands of stocks for low float, high gap, unusual volume, and social media momentum.",
+    phase: "INGEST",
+    title: "Data Collection",
+    desc: "Pull pre-market data from exchanges + scrape Reddit, X, and TikTok for ticker mentions.",
     icon: Search,
+    color: "indigo",
+    sources: ["NYSE / NASDAQ", "r/wallstreetbets", "X cashtags", "TikTok finance"],
   },
   {
-    step: "02",
-    title: "Signals Generated",
-    desc: "The scoring engine ranks each stock, calculates entry/exit levels, and assigns a directional bias with risk-reward ratios.",
+    phase: "ANALYZE",
+    title: "NLP Sentiment + Scoring",
+    desc: "Classify each mention as bullish/bearish/neutral using LLM analysis. Score stocks on float, gap, volume, and social velocity.",
+    icon: Activity,
+    color: "amber",
+    sources: ["Gemini 2.5 Flash", "Negation detection", "Sarcasm heuristics", "7-factor scoring"],
+  },
+  {
+    phase: "DETECT",
+    title: "Shift Detection",
+    desc: "Compare current sentiment against historical snapshots. Flag tickers where crowd bias flips from bearish to bullish.",
     icon: Zap,
+    color: "emerald",
+    sources: ["Snapshot diffing", "15pt+ threshold", "Cross-platform merge", "Severity grading"],
   },
   {
-    step: "03",
-    title: "You Execute",
-    desc: "Review the picks, check the sentiment radar, and make informed decisions with data — not emotions — before the market opens.",
+    phase: "DELIVER",
+    title: "20 Scored Picks",
+    desc: "Lock the top 20 stocks at market open with entry signals, support/resistance levels, and directional bias.",
     icon: Target,
+    color: "rose",
+    sources: ["Entry / exit levels", "Risk-reward ratios", "Sentiment split", "Velocity signals"],
   },
 ];
 
@@ -261,26 +275,26 @@ export default function Landing() {
 
             <motion.h1
               variants={fadeUp}
-              className="font-heading text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6"
+              className="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6"
             >
-              Stop Guessing.{" "}
-              <br className="hidden sm:block" />
-              <span className="text-gradient">Start Knowing.</span>
+              Detect Sentiment Shifts in Penny Stocks{" "}
+              <span className="text-gradient">Before the Move Happens.</span>
             </motion.h1>
 
             <motion.p
               variants={fadeUp}
               className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-2xl mb-4"
             >
-              Axiarch scans thousands of stocks, tracks Reddit sentiment in real-time, and delivers
-              20 algorithmically scored picks to your screen — every morning before the bell.
+              Axiarch scans thousands of stocks, tracks crowd sentiment across Reddit, X, and TikTok
+              with NLP-powered analysis, and delivers 20 algorithmically scored picks to your screen
+              — every morning before the bell.
             </motion.p>
 
             <motion.p
               variants={fadeUp}
               className="text-sm text-muted-foreground/70 mb-10"
             >
-              Used by day traders who want data, not opinions.
+              Built for day traders who want data, not opinions.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4">
@@ -353,7 +367,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── How It Works ── */}
+      {/* ── How It Works — Algorithm Pipeline ── */}
       <section className="container py-24">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -363,50 +377,89 @@ export default function Landing() {
           className="text-center mb-16"
         >
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo/10 border border-indigo/20 text-indigo text-xs font-mono font-medium tracking-wider mb-4">
-            HOW IT WORKS
+            HOW THE ALGORITHM WORKS
           </span>
           <h2 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            From Scan to Signal in Seconds
+            Four Stages. One Pipeline.{" "}
+            <span className="text-gradient">Every Morning.</span>
           </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Three steps. Zero guesswork. Every morning before the market opens.
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Axiarch runs a four-stage pipeline before the market opens — from raw data ingestion
+            to scored picks on your screen.
           </p>
         </motion.div>
 
+        {/* Pipeline visualization */}
         <motion.div
           variants={stagger}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid md:grid-cols-3 gap-6"
+          className="relative"
         >
-          {howItWorks.map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <motion.div key={item.step} variants={fadeUp}>
-                <div className="relative group">
-                  <Card className="bg-card/80 border-border/40 hover:border-indigo/30 transition-all duration-300 h-full">
-                    <CardContent className="p-8">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-12 h-12 rounded-xl bg-indigo/10 border border-indigo/20 flex items-center justify-center">
-                          <Icon className="w-5 h-5 text-indigo" />
-                        </div>
-                        <span className="font-mono text-4xl font-bold text-indigo/20">{item.step}</span>
+          {/* Connecting line (desktop) */}
+          <div className="hidden lg:block absolute top-[60px] left-[10%] right-[10%] h-px bg-gradient-to-r from-indigo/40 via-amber/40 via-emerald/40 to-rose/40 z-0" />
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {pipelineSteps.map((step, i) => {
+              const Icon = step.icon;
+              const colorMap: Record<string, { text: string; bg: string; border: string; dot: string }> = {
+                indigo: { text: "text-indigo", bg: "bg-indigo/10", border: "border-indigo/20", dot: "bg-indigo" },
+                amber: { text: "text-amber", bg: "bg-amber/10", border: "border-amber/20", dot: "bg-amber" },
+                emerald: { text: "text-emerald", bg: "bg-emerald/10", border: "border-emerald/20", dot: "bg-emerald" },
+                rose: { text: "text-rose", bg: "bg-rose/10", border: "border-rose/20", dot: "bg-rose" },
+              };
+              const c = colorMap[step.color] || colorMap.indigo;
+              return (
+                <motion.div key={step.phase} variants={fadeUp}>
+                  <div className="relative">
+                    {/* Phase node dot */}
+                    <div className="hidden lg:flex justify-center mb-4">
+                      <div className={`relative z-10 w-8 h-8 rounded-full ${c.bg} border-2 ${c.border} flex items-center justify-center`}>
+                        <div className={`w-2.5 h-2.5 rounded-full ${c.dot} ${i === 3 ? 'animate-pulse' : ''}`} />
                       </div>
-                      <h3 className="font-heading font-semibold text-lg mb-3 text-foreground">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                    </CardContent>
-                  </Card>
-                  {/* Connector arrow (not on last) */}
-                  {i < howItWorks.length - 1 && (
-                    <div className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
-                      <ChevronRight className="w-6 h-6 text-indigo/30" />
                     </div>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
+
+                    <Card className={`bg-card/80 border-border/40 hover:${c.border} transition-all duration-300 h-full`}>
+                      <CardContent className="p-6">
+                        {/* Phase label */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className={`w-10 h-10 rounded-lg ${c.bg} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-4.5 h-4.5 ${c.text}`} />
+                          </div>
+                          <span className={`font-mono text-[10px] font-bold tracking-widest ${c.text} opacity-80`}>
+                            STAGE {String(i + 1).padStart(2, "0")} · {step.phase}
+                          </span>
+                        </div>
+
+                        <h3 className="font-heading font-semibold text-base mb-2 text-foreground">{step.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{step.desc}</p>
+
+                        {/* Source tags */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {step.sources.map((src) => (
+                            <span
+                              key={src}
+                              className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono ${c.bg} ${c.text} opacity-70`}
+                            >
+                              {src}
+                            </span>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Mobile connector arrow */}
+                    {i < pipelineSteps.length - 1 && (
+                      <div className="flex sm:hidden justify-center py-2">
+                        <ChevronDown className={`w-5 h-5 ${c.text} opacity-40`} />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </motion.div>
       </section>
 
