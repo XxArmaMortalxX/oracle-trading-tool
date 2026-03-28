@@ -1,8 +1,13 @@
 /**
  * Reddit Sentiment Classifier
  * 
- * Analyzes Reddit post titles to classify each ticker mention as
- * Bullish, Bearish, or Neutral using keyword/phrase matching.
+ * Analyzes Reddit post titles to classify each ticker mention using
+ * a multi-tier NLP approach:
+ * 
+ * Tier 1: LLM-based classification (Gemini 2.5 Flash) with full context
+ *         understanding, negation handling, and sarcasm detection.
+ * Tier 2: Enhanced keyword classifier with negation awareness,
+ *         sarcasm heuristics, and temporal modifiers.
  * 
  * Fetches posts from r/wallstreetbets, r/pennystocks, r/shortsqueeze
  * using Reddit's public JSON API, extracts ticker mentions, and
@@ -14,50 +19,15 @@
  *   - totalMentions: number of Reddit posts mentioning this ticker
  */
 
-// ── Keyword Lists ──
+import {
+  classifyPostSentiment as nlpClassifyPostSentiment,
+  classifyBatch as nlpClassifyBatch,
+  type SentimentClassification,
+} from "./nlpSentimentClassifier";
 
-const BULLISH_KEYWORDS = [
-  // Direct bullish signals
-  "calls", "call", "long", "buy", "buying", "bought", "moon", "mooning",
-  "rocket", "rockets", "🚀", "squeeze", "squeezing", "breakout", "breaking out",
-  "bullish", "bull", "bulls", "upside", "rip", "ripping", "rally", "rallying",
-  "pump", "pumping", "tendies", "tendie", "diamond hands", "💎", "🙌",
-  "to the moon", "going up", "gap up", "gapping up", "runner", "running",
-  "parabolic", "send it", "all in", "yolo", "undervalued", "underpriced",
-  "oversold", "accumulate", "accumulating", "loading", "loaded",
-  "catalyst", "approval", "approved", "fda approval", "partnership",
-  "contract", "deal", "upgrade", "upgraded", "beat", "beats", "earnings beat",
-  "revenue beat", "guidance raise", "raised guidance", "insider buying",
-  "short squeeze", "gamma squeeze", "high short interest",
-  "support", "bounce", "bouncing", "recovery", "recovering",
-  "double bottom", "golden cross", "breakout pattern",
-  "massive volume", "huge volume", "volume spike",
-  "free money", "easy money", "print money", "money printer",
-  "next gme", "next amc", "next squeeze",
-  "🔥", "🤑", "📈", "💰", "🌙",
-];
-
-const BEARISH_KEYWORDS = [
-  // Direct bearish signals
-  "puts", "put", "short", "shorting", "shorted", "sell", "selling", "sold",
-  "dump", "dumping", "dumped", "crash", "crashing", "crashed",
-  "bearish", "bear", "bears", "downside", "tank", "tanking", "tanked",
-  "plunge", "plunging", "plunged", "drill", "drilling",
-  "overvalued", "overpriced", "overbought", "bubble",
-  "bag holder", "bagholder", "bagholding", "bag holding",
-  "loss porn", "loss", "losses", "red", "bleeding",
-  "dead cat bounce", "dead cat", "death cross", "head and shoulders",
-  "resistance", "rejection", "rejected", "failed",
-  "dilution", "diluted", "offering", "shelf offering", "atm offering",
-  "sec investigation", "sec probe", "lawsuit", "fraud", "scam",
-  "downgrade", "downgraded", "miss", "missed", "earnings miss",
-  "revenue miss", "guidance cut", "lowered guidance", "insider selling",
-  "delisting", "delisted", "bankruptcy", "bankrupt",
-  "warning", "caution", "careful", "trap", "bull trap",
-  "gap down", "gapping down", "falling knife", "knife catching",
-  "rug pull", "rugpull", "ponzi",
-  "📉", "🔻", "💀", "☠️", "🪦",
-];
+// Re-export the NLP classifier as the primary classifier
+export { classifyPostSentiment } from "./nlpSentimentClassifier";
+export type { SentimentClassification } from "./nlpSentimentClassifier";
 
 // ── Types ──
 
@@ -93,66 +63,6 @@ export interface RedditSentimentSnapshot {
   totalPosts: number;
   totalTickers: number;
   tickers: Map<string, TickerSentimentSplit>;
-}
-
-// ── Classifier ──
-
-/**
- * Classify a post title as BULLISH, BEARISH, or NEUTRAL for a given ticker.
- * Uses weighted keyword matching — longer/more specific phrases get higher weight.
- */
-export function classifyPostSentiment(title: string, _ticker: string): {
-  classification: "BULLISH" | "BEARISH" | "NEUTRAL";
-  bullishSignals: string[];
-  bearishSignals: string[];
-  bullishScore: number;
-  bearishScore: number;
-} {
-  const lower = title.toLowerCase();
-  const bullishSignals: string[] = [];
-  const bearishSignals: string[] = [];
-  let bullishScore = 0;
-  let bearishScore = 0;
-
-  // Check bullish keywords — longer phrases get more weight
-  for (const kw of BULLISH_KEYWORDS) {
-    if (lower.includes(kw.toLowerCase())) {
-      bullishSignals.push(kw);
-      // Multi-word phrases are stronger signals
-      const weight = kw.includes(" ") ? 2 : 1;
-      bullishScore += weight;
-    }
-  }
-
-  // Check bearish keywords
-  for (const kw of BEARISH_KEYWORDS) {
-    if (lower.includes(kw.toLowerCase())) {
-      bearishSignals.push(kw);
-      const weight = kw.includes(" ") ? 2 : 1;
-      bearishScore += weight;
-    }
-  }
-
-  // Determine classification
-  let classification: "BULLISH" | "BEARISH" | "NEUTRAL";
-  if (bullishScore === 0 && bearishScore === 0) {
-    classification = "NEUTRAL";
-  } else if (bullishScore > bearishScore) {
-    classification = "BULLISH";
-  } else if (bearishScore > bullishScore) {
-    classification = "BEARISH";
-  } else {
-    // Tie — classify as NEUTRAL (mixed signals)
-    classification = "NEUTRAL";
-  }
-
-  return {
-    classification,
-    bullishSignals: Array.from(new Set(bullishSignals)),
-    bearishSignals: Array.from(new Set(bearishSignals)),
-    bullishScore,
-    bearishScore,
-  };
 }
 
 /**
@@ -380,33 +290,52 @@ export async function fetchAllRedditPosts(): Promise<RedditPost[]> {
 
 /**
  * Process all posts: extract tickers, classify sentiment, compute splits.
+ * Uses batch LLM classification for better accuracy.
  */
-export function processPostsForSentiment(posts: RedditPost[]): Map<string, TickerSentimentSplit> {
+export async function processPostsForSentiment(posts: RedditPost[]): Promise<Map<string, TickerSentimentSplit>> {
   // Step 1: Extract ticker mentions from all posts
-  const tickerMentions = new Map<string, PostMention[]>();
+  const postTickerPairs: { postIndex: number; ticker: string; post: RedditPost }[] = [];
 
-  for (const post of posts) {
-    const tickers = extractTickers(post.title);
+  for (let i = 0; i < posts.length; i++) {
+    const tickers = extractTickers(posts[i].title);
     for (const ticker of tickers) {
-      const result = classifyPostSentiment(post.title, ticker);
-      const mention: PostMention = {
-        ticker,
-        title: post.title,
-        subreddit: post.subreddit,
-        score: post.score,
-        classification: result.classification,
-        bullishSignals: result.bullishSignals,
-        bearishSignals: result.bearishSignals,
-      };
-
-      if (!tickerMentions.has(ticker)) {
-        tickerMentions.set(ticker, []);
-      }
-      tickerMentions.get(ticker)!.push(mention);
+      postTickerPairs.push({ postIndex: i, ticker, post: posts[i] });
     }
   }
 
-  // Step 2: Compute sentiment split for each ticker
+  if (postTickerPairs.length === 0) return new Map();
+
+  // Step 2: Batch classify all post texts
+  const textsToClassify = postTickerPairs.map(p => ({
+    text: p.post.title,
+    ticker: p.ticker,
+  }));
+
+  const classifications = await nlpClassifyBatch(textsToClassify);
+
+  // Step 3: Build ticker mentions from classifications
+  const tickerMentions = new Map<string, PostMention[]>();
+
+  for (let i = 0; i < postTickerPairs.length; i++) {
+    const { ticker, post } = postTickerPairs[i];
+    const result = classifications[i];
+    const mention: PostMention = {
+      ticker,
+      title: post.title,
+      subreddit: post.subreddit,
+      score: post.score,
+      classification: result.classification,
+      bullishSignals: result.bullishSignals,
+      bearishSignals: result.bearishSignals,
+    };
+
+    if (!tickerMentions.has(ticker)) {
+      tickerMentions.set(ticker, []);
+    }
+    tickerMentions.get(ticker)!.push(mention);
+  }
+
+  // Step 4: Compute sentiment split for each ticker
   const result = new Map<string, TickerSentimentSplit>();
   for (const [ticker, mentions] of Array.from(tickerMentions.entries())) {
     result.set(ticker, computeSentimentSplit(ticker, mentions));
@@ -430,17 +359,18 @@ export async function fetchRedditSentimentCached(): Promise<RedditSentimentSnaps
   }
 
   const posts = await fetchAllRedditPosts();
-  const tickers = processPostsForSentiment(posts);
+  const tickers = await processPostsForSentiment(posts);
 
-  cachedSentiment = {
+  const snapshot: RedditSentimentSnapshot = {
     fetchedAt: new Date(),
     totalPosts: posts.length,
     totalTickers: tickers.size,
     tickers,
   };
 
+  cachedSentiment = snapshot;
   console.log(`[RedditSentiment] Analyzed ${posts.length} posts, found ${tickers.size} tickers with sentiment data`);
-  return cachedSentiment;
+  return snapshot;
 }
 
 /**

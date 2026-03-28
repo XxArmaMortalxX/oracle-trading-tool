@@ -210,3 +210,16 @@
 - [x] Write 16 tests for unified aggregator (merging, sentiment, platform breakdown)
 - [x] All 151 tests passing across 10 test files
 - [x] Legacy Reddit routes preserved for backward compatibility
+
+## NLP Sentiment Classifier Upgrade
+- [x] Build LLM-based classifier (Gemini 2.5 Flash) with structured JSON output for batch classification
+- [x] Build negation-aware keyword fallback (handles "not bullish", "don't buy", "won't crash", "never sell", etc.)
+- [x] Add sarcasm detection heuristics (quoted phrases, "sure totally", "trust me bro", excessive punctuation)
+- [x] Add past tense / temporal modifier handling ("was bullish" = reduced weight)
+- [x] Create nlpSentimentClassifier.ts: LLM primary (Tier 1) + enhanced keyword fallback (Tier 2)
+- [x] Add batch processing (25 posts per LLM call) with in-memory result cache (5000 entries)
+- [x] Integrate into redditSentiment.ts (re-exports classifyPostSentiment, async processPostsForSentiment)
+- [x] xTracker.ts and tiktokTracker.ts automatically use new classifier via redditSentiment imports
+- [x] Write 40 tests: negation (7), sarcasm (3), temporal (2), real-world (6), confidence (3), batch (4), edge cases (6), basic (6), API (3)
+- [x] All 191 tests passing across 11 test files (40 new NLP + 151 existing)
+- [x] LLM cooldown: 5 min after failure, auto-retry, graceful fallback to enhanced keywords
