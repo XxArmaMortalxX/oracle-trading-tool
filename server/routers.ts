@@ -71,7 +71,8 @@ async function getScreenerStocks(): Promise<ScreenerCache> {
   console.log(`[Screener] Fetching fresh data for ${UNIQUE_UNIVERSE.length} tickers...`);
   const startTime = Date.now();
 
-  const batchSize = 10;
+  const batchSize = 5;
+  const BATCH_DELAY_MS = 1000; // 1 second between batches
   const allStocks: StockChartData[] = [];
   let errorCount = 0;
 
@@ -88,7 +89,7 @@ async function getScreenerStocks(): Promise<ScreenerCache> {
       break;
     }
     if (i + batchSize < UNIQUE_UNIVERSE.length) {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
     }
   }
 
