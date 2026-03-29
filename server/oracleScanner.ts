@@ -395,7 +395,8 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
   console.log(`[OracleScanner] Starting LIVE scan of ${UNIQUE_UNIVERSE.length} tickers...`);
 
   // Fetch data for all tickers in batches to avoid rate limits
-  const batchSize = 10;
+  const batchSize = 5;
+  const BATCH_DELAY_MS = 1000; // 1 second between batches
   const allStockData: StockChartData[] = [];
   let fetchErrors = 0;
 
@@ -406,9 +407,9 @@ export async function runOracleScan(maxPicks: number = 20): Promise<{
       if (r) allStockData.push(r);
       else fetchErrors++;
     }
-    // Small delay between batches to respect rate limits
+    // Delay between batches to respect rate limits
     if (i + batchSize < UNIQUE_UNIVERSE.length) {
-      await new Promise(resolve => setTimeout(resolve, 250));
+      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
     }
     // Progress log every 50 tickers
     if ((i + batchSize) % 50 === 0 || i + batchSize >= UNIQUE_UNIVERSE.length) {
