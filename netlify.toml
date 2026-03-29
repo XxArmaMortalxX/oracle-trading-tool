@@ -1,0 +1,12 @@
+[build]
+  command = "pnpm install && pnpm build"
+  publish = "dist/public"
+
+[env]
+  # Add any environment variables you need
+
+[redirects]
+  # Redirect all routes to index.html for client-side routing
+  from = "/*"
+  to = "/index.html"
+  status = 200
